@@ -1,0 +1,19 @@
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4.1.1
+      with:
+        fetch-depth: 999
+        fetch-tags: true
+        submodules: true
+        ssh-key: ${{ secrets.ACCESS_KEY }}
+    - name: Build
+      run: ./build.sh --target Publish --publish --source GitHUb --feed ${{ vars.ISE_NUGET_FEED }} --username ${{ vars.ISE_NUGET_USERNAME }} --token ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,29 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+
+		<!-- Microsoft.Extensions.* Ver -->
+		<DotNet8Version>8.0.0</DotNet8Version>
+  </PropertyGroup>
+	
+  <ItemGroup>
+		<PackageVersion Include="Ben.Demystifier" Version="0.4.1" />
+		<PackageVersion Include="BenchmarkDotNet" Version="0.13.7" />
+    <PackageVersion Include="FluentValidation" Version="11.6.0" />
+		<PackageVersion Include="MinVer" Version="4.3.0" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration" Version="$(DotNet8Version)" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(DotNet8Version)" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(DotNet8Version)" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(DotNet8Version)" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(DotNet8Version)" />
+		<PackageVersion Include="Microsoft.Extensions.Options" Version="$(DotNet8Version)" />
+		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="$(DotNet8Version)" />
+		<PackageVersion Include="Microsoft.Extensions.Http" Version="$(DotNet8Version)" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+		<PackageVersion Include="Microsoft.SourceLink.GitHub" Version="$(DotNet8Version)" />
+		<PackageVersion Include="System.Net.Http.Json" Version="$(DotNet8Version)" />
+		<PackageVersion Include="System.Text.Json" Version="8.0.4" />
+		<PackageVersion Include="xunit" Version="2.6.5" />
+		<PackageVersion Include="xunit.runner.visualstudio" Version="2.5.6" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Description>FuManchu is a text templating engine based on HandlebarsJS</Description>
+		<AssemblyTitle>FuManchu - Handlebar templating for .NET</AssemblyTitle>
+		<TargetFrameworks>netstandard2.1</TargetFrameworks>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AssemblyName>FuManchu</AssemblyName>
+		<PackageId>FuManchu</PackageId>
+		<PackageTags>fumanchu;handlebars</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>git://github.com/IngeniumSE/FuManchu</RepositoryUrl>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>../../FuManchu.snk</AssemblyOriginatorKeyFile>
+		<DelaySign>false</DelaySign>
+		<PackageProjectUrl>https://github.com/IngeniumSE/FuManchu</PackageProjectUrl>
+		<Copyright>Copyright 2024 Ingenium Software Engineering</Copyright>
+		<ImplicitPackageReferences>false</ImplicitPackageReferences>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MinVer" />
+	</ItemGroup>
+
+</Project>
