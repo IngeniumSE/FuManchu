@@ -4,6 +4,7 @@
 namespace FuManchu.Renderer;
 
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 
@@ -36,6 +37,13 @@ public class PartialBlockRenderer : BlockRenderer
 		if (model != null)
 		{
 			using (var scope = context.BeginScope(model))
+			{
+				Write(scope.ScopeContext, writer, new SafeString(context.Service.RunPartial(name, scope.ScopeContext)));
+			}
+		}
+		else if (maps is { Count: > 0 })
+		{
+			using (var scope = context.BeginScope(maps))
 			{
 				Write(scope.ScopeContext, writer, new SafeString(context.Service.RunPartial(name, scope.ScopeContext)));
 			}
