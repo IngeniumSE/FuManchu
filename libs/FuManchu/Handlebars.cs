@@ -104,4 +104,16 @@ public static class Handlebars
 	{
 		return _handlebarsService.Value.RunPartial(name, context);
 	}
+
+	/// <summary>
+	/// Runs a pre-compiled partial template, outputing against the given text writer.
+	/// </summary>
+	/// <param name="name">The name of the partial template.</param>
+	/// <param name="context">The render context.</param>
+	/// <param name="writer">The text writer</param>
+	/// <returns>The template result.</returns>
+	public static void RunPartial(string name, RenderContext context, TextWriter writer)
+	{
+		_handlebarsService.Value.RunPartial(name, context, writer);
+	}
 }

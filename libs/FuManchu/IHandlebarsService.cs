@@ -72,6 +72,14 @@ public interface IHandlebarsService
 	string RunPartial(string name, RenderContext context);
 
 	/// <summary>
+	/// Runs a pre-compiled partial template, outputing against the given text writer.
+	/// </summary>
+	/// <param name="name">The name of the partial template.</param>
+	/// <param name="context">The render context.</param>
+	/// <param name="writer">The text writer</param>
+	void RunPartial(string name, RenderContext context, TextWriter writer);
+
+	/// <summary>
 	/// Runs a registered helper.
 	/// </summary>
 	/// <param name="name">The name of the helper.</param>
