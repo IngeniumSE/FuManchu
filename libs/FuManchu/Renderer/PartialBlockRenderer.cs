@@ -38,19 +38,19 @@ public class PartialBlockRenderer : BlockRenderer
 		{
 			using (var scope = context.BeginScope(model))
 			{
-				Write(scope.ScopeContext, writer, new SafeString(context.Service.RunPartial(name, scope.ScopeContext)));
+				context.Service.RunPartial(name, scope.ScopeContext, writer);
 			}
 		}
 		else if (maps is { Count: > 0 })
 		{
 			using (var scope = context.BeginScope(maps))
 			{
-				Write(scope.ScopeContext, writer, new SafeString(context.Service.RunPartial(name, scope.ScopeContext)));
+				context.Service.RunPartial(name, scope.ScopeContext, writer);
 			}
 		}
 		else
 		{
-			Write(context, writer, new SafeString(context.Service.RunPartial(name, context)));
+			context.Service.RunPartial(name, context, writer);
 		}
 	}
 }

@@ -111,20 +111,15 @@ public class HandlebarsService : IHandlebarsService
 		var whitespace = new WhiteSpaceCollapsingParserVisitor();
 		document.Accept(whitespace);
 
-		return (context) =>
+		return (context, writer) =>
 		{
-			using (var writer = new StringWriter())
+			var render = new RenderingParserVisitor(writer, context, ModelMetadataProvider ?? new DefaultModelMetadataProvider())
 			{
-				var render = new RenderingParserVisitor(writer, context, ModelMetadataProvider ?? new DefaultModelMetadataProvider())
-				{
-					Service = this
-				};
+				Service = this
+			};
 
-				// Render the document.
-				document.Accept(render);
-
-				return writer.GetStringBuilder().ToString();
-			}
+			// Render the document.
+			document.Accept(render);
 		};
 	}
 
@@ -207,10 +202,23 @@ public class HandlebarsService : IHandlebarsService
 	/// <inheritdoc />
 	public string RunPartial(string name, RenderContext context)
 	{
+		using (var writer = new StringWriter())
+		{
+			RunPartial(name, context, writer);
+
+			return writer.GetStringBuilder().ToString();
+		}
+	}
+
+	/// <inheritdoc />
+	public void RunPartial(string name, RenderContext context, TextWriter writer)
+	{
 		HandlebarPartialTemplate func;
 		if (_partials.TryGetValue(name, out func))
 		{
-			return func(context);
+			func(context, writer);
+
+			return;
 		}
 
 		throw new ArgumentException("No partial template called '" + name + "' has been compiled.");

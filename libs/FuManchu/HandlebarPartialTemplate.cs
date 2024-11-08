@@ -9,5 +9,6 @@ using FuManchu.Renderer;
 /// Represents a compiled Handlebars partial template.
 /// </summary>
 /// <param name="context">The parent render context.</param>
+/// <param name="writer">The output text writer.</param>
 /// <returns>The template result.</returns>
-public delegate string HandlebarPartialTemplate(RenderContext context);
+public delegate void HandlebarPartialTemplate(RenderContext context, TextWriter writer);
