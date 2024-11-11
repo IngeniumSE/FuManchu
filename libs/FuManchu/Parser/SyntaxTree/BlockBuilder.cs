@@ -36,12 +36,27 @@ public class BlockBuilder
 	/// <summary>
 	/// Gets the set of child nodes
 	/// </summary>
-	public IList<SyntaxTreeNode> Children { get; private set; }
+	public List<SyntaxTreeNode> Children { get; private set; }
 
 	/// <summary>
 	/// Gets or sets the tag descriptor.
 	/// </summary>
 	public TagDescriptor? Descriptor { get; set; }
+
+	/// <summary>
+	/// Gets or sets whether the tag is a partial block.
+	/// </summary>
+	public bool IsPartialBlock { get; set; }
+
+	/// <summary>
+	/// Gets or sets whether the tag is a partial block content.
+	/// </summary>
+	public bool IsPartialBlockContent { get; set; }
+
+	/// <summary>
+	/// Gets or sets whether the tag is the implicit partial block content.
+	/// </summary>
+	public bool IsImplicitPartialBlockContent { get; set; }
 
 	/// <summary>
 	/// Gets or sets the name.

@@ -14,5 +14,10 @@ public enum BlockType
 	Tag,
 	TagElement,
 	Expression,
-	Partial
+	Partial,
+	PartialBlock,
+	PartialBlockElement,
+	PartialBlockContent,
+	PartialBlockContentElement,
+	Zone
 }

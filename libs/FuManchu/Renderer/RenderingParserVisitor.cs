@@ -104,6 +104,14 @@ public class RenderingParserVisitor : ParserVisitor<RenderContext>
 		{
 			VisitPartial(block);
 		}
+		else if (block.Type == BlockType.PartialBlock && Service != null)
+		{
+			VisitPartial(block);
+		}
+		else if (block.Type == BlockType.Zone && Service != null)
+		{
+			VisitZone(block);
+		}
 		else if (block.Type == BlockType.Expression && Service != null && Service.HasRegisteredHelper(block.Name!))
 		{
 			_helperBlockRenderer.Render(block, Scope, _textWriter);
@@ -160,6 +168,15 @@ public class RenderingParserVisitor : ParserVisitor<RenderContext>
 	public void VisitPartial(Block block)
 	{
 		new PartialBlockRenderer().Render(block, Scope, _textWriter);
+	}
+
+	/// <summary>
+	/// Visits a zone block.
+	/// </summary>
+	/// <param name="block">The block.</param>
+	public void VisitZone(Block block)
+	{
+		new ZoneBlockRenderer().Render(block, Scope, _textWriter);
 	}
 
 	/// <inheritdoc />

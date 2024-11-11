@@ -57,21 +57,21 @@ Block tags are define using the `{{#tag}}{{/tag}}` syntax. There are three types
 You can use the `if`, `elseif`, `else` tags to provide conditional logic to your templates.
 
 	{{#if value}}
-		True
+	  True
 	{{/if}}
 
 	{{#if value}}
-		True
+	  True
 	{{else}}
-		False
+	  False
 	{{/if}}
 
 	{{#if value1}}
-		Value 1
+	  Value 1
 	{{#elseif value2}}
-		Value 2
+	  Value 2
 	{{else}}
-		None
+	  None
 	{{/if}}
 
 We resolve the truthfulness of values using the same semantics of *truthy/falsely* logic of JavaScript, therefore, values that are `null`, or the number zero, empty enumerables and empty strings, are all considered false. Everything else is considered true.
@@ -79,9 +79,9 @@ We resolve the truthfulness of values using the same semantics of *truthy/falsel
 The `{{else}}` tag can be also be written as `{{^}}` in your templates
 
 	{{#if value}}
-		True
+	  True
 	{{^}}
-		False
+	  False
 	{{/if}}
 
 **Built-ins: unless, else**
@@ -89,13 +89,13 @@ The `{{else}}` tag can be also be written as `{{^}}` in your templates
 `unless` is the negated version of `if`. It will allow you to assume truthful values, and present output if the value is falsey.
 
 	{{#unless value}}
-		Value is not true!
+	  Value is not true!
 	{{/unless}}
 
 	{{#unless value}}
-		Value is not true!
+	  Value is not true!
 	{{else}}
-		Value was true!
+	  Value was true!
 	{{/unless}}
 
  The `{{else}}` tag can be also be written as `{{^}}` in your templates
@@ -105,9 +105,9 @@ The `{{else}}` tag can be also be written as `{{^}}` in your templates
 The `each` tag allows you to iterate over enumerable objects.
 
 	<ul>
-		{{#each items}}
-			<li>{{value}}</li>
-		{{/each}}
+	  {{#each items}}
+	    <li>{{value}}</li>
+	  {{/each}}
 	</ul>
 
 The `each` block tag creates a scope around the target model (therefore each child of `items`, above), to allow you to use the `{{value}}` expressions, where `value` is a property of a child of `items`. A more concrete example could be:
@@ -131,9 +131,9 @@ The `each` tag also supports the variables `@index`, `@first`, `@last`. If you e
 You can provided a `{{else}}` switch to provide an output when the enumerable is empty:
 
 	{{#each items}}
-		Item {{@index}}
+	  Item {{@index}}
 	{{else}}
-		No items!
+	  No items!
 	{{/each}}
 
  The `{{else}}` tag can be also be written as `{{^}}` in your templates
@@ -144,15 +144,15 @@ The `with` block creates a scope around the parameter argument.
 	var model = new { person = new { forename = "Matt", surname = "Abbott" } };
 
 	{{#with person}}
-		Name: {{forename}} {{surname}}
+	  Name: {{forename}} {{surname}}
 	{{/with}}
 
 Again, as with `each`, you can use the `{{else}}` switch to provide an output if the value passed into the `with` tag is falsey:
 
 	{{#with person}}
-		Name: {{forename}} {{surname}}
+	  Name: {{forename}} {{surname}}
 	{{else}}
-		Nobody :-(
+	  Nobody :-(
 	{{/with}}
 
  The `{{else}}` tag can be also be written as `{{^}}` in your templates
@@ -165,21 +165,21 @@ You can use shorthand `{{#tag}}{{/tag}}` where "tag" is the name of a property o
 	var model = new { person = new { forename = "Matt", surname = "Abbott" } };
 
 	{{#person}}
-		Name: {{forename}} {{surname}}
+	  Name: {{forename}} {{surname}}
 	{{/person}}
 
 The above is equivalent to:
 
 	{{#if person}}
-		{{#with person}}
-			Name: {{forename}} {{surname}}
-		{{/with}}
+	  {{#with person}}
+	    Name: {{forename}} {{surname}}
+	  {{/with}}
 	{{/if}}
 
 If you're property also happens to be an enumerable, then the implicit block tag works like `each`:
 
 	{{#people}}
-		<li>{{@index}}: {{forename}} {{surname}}</li>
+	  <li>{{@index}}: {{forename}} {{surname}}</li>
 	{{/people}}
 
 Inverted Block Tags
@@ -187,7 +187,7 @@ Inverted Block Tags
 Inverted block tags follow the rules for implicit block tags, but are used to provided content when the tag expression resolves to *falsey*.
 
 	{{^power}}
-		You have no power here!
+	  You have no power here!
 	{{/power}}
 
 Block Helpers
@@ -196,17 +196,17 @@ Block Helpers
 You can register custom helpers using the `Handlebars` service. You need to register a helper ahead of time, which you can then call from your template.
 
 	Handlebars.RegisterHelper("list", options => {
-		var enumerable = options.Data as IEnumerable ?? new[] { (object)options.Data };
+	  var enumerable = options.Data as IEnumerable ?? new[] { (object)options.Data };
 
-		return "<ul>"
-			+ string.Join("", enumerable.OfType<object>().Select(options.Fn))
-			+ "</ul>";
+	  return "<ul>"
+	    + string.Join("", enumerable.OfType<object>().Select(options.Fn))
+	    + "</ul>";
 	});
 
 For block helpers, the `options` parameter provides access to the content of your block helper, therefore given the following usage:
 
 	{{#list people}}
-		<li>{{forename}} {{surname}}</li>
+	  <li>{{forename}} {{surname}}</li>
 	{{/list}}
 
 When calling `options.Fn` (or `options.Render`), the content of your custom helper block is rendered, scoped to the value passed to the render function.
@@ -215,19 +215,19 @@ When calling `options.Fn` (or `options.Render`), the content of your custom help
 You can pass additional information to your helpers using your helper block, e.g.:
 
 	var model = new {
-		people = new List<People>(),
-		message = "Hello World"
+	  people = new List<People>(),
+	  message = "Hello World"
 	};
 
 	Handlebars.RegisterHelper("list", options => {
-		var people = options.Data as List<People>;
-		string message = options.Arguments[1] as string;
-		string cssClass = options.Hash["class"];
+	  var people = options.Data as List<People>;
+	  string message = options.Arguments[1] as string;
+	  string cssClass = options.Hash["class"];
 
-		return "<ul class=\"" + cssClass + "\">"
-			+ "<li>" + message + "</li>"
-			+ string.Join("", enumerable.OfType<object>().Select(options.Fn))
-			+ "</ul>";
+	  return "<ul class=\"" + cssClass + "\">"
+	    + "<li>" + message + "</li>"
+	    + string.Join("", enumerable.OfType<object>().Select(options.Fn))
+	    + "</ul>";
 	});
 
 	{{#list people message class="nav nav-pills"}}...{{/list}}
@@ -239,14 +239,14 @@ Expression Tags
 Expression tags are simple `{{value}}` type tags that allow you to render content into your templates, by binding values from your input models (or 'contexts' in HandlebarsJS speak). There are a variety of ways you can call these properties, so given:
 
 	var model = new {
-		person = new {
-			forename = "Matt",
-			surname = "Abbott",
-			age = 30,
-			job = new {
-				title = "Developer"
-			}
-		}
+	  person = new {
+		  forename = "Matt",
+	    surname = "Abbott",
+	    age = 30,
+	    job = new {
+	      title = "Developer"
+	    }
+	  }
 	};
 
 	{{person.forename}}
@@ -258,9 +258,9 @@ Expression tags are simple `{{value}}` type tags that allow you to render conten
 	And also within scopes:
 
 	{{#with person}}
-		{{#with job}}
-			{{../forename}} {{../surname}}
-		{{/with}}
+	  {{#with job}}
+	    {{../forename}} {{../surname}}
+	  {{/with}}
 	{{/with}}
 
 You can use these same 'context paths' as arguments and hash parameters in your block tags too:
@@ -277,7 +277,7 @@ Expression Helpers
 Just like Block Helpers, you can create Expression Helpers too, using the same function as before:
 
 	Handlebars.RegisterHelper("name", options => {
-		return string.Format("{0} {1}", options.Data.forename, options.data.surname);
+	  return string.Format("{0} {1}", options.Data.forename, options.data.surname);
 	});
 
 Called using the expression syntax, this time with arguments:
@@ -309,6 +309,36 @@ You can alternatively pass through parameters, if you need to provide a paramete
 	var model = new { person = new { forename = "Matt", surname = "Abbott" } };
 
 	{{>name firstName=person.forename lastName=person.surname}}
+
+Partial Template Blocks
+-
+You can also create partial templates that allow you to insert content from the outer template into the partial template. This is useful for creating layouts or component-like partials.
+
+	Handlebars.RegisterPartial("heading", "<h1>Hello {{<content}}</h1>");
+
+Alternatively, you can use the HandlebarsJS syntax:
+
+	Handlebars.RegisterPartial("heading", "<h1>Hello {{>@partial-block}}</h1>");
+
+To call this component, you can now specify the content to be inserted into the partial template:
+
+	{{>heading}}World{{/heading}}
+
+Which should render:
+
+	<h1>Hello World</h1>
+
+You can also define partials that support multiple zones:
+
+	Handlebars.RegisterPartial("layout", "<div>{{<header}}</div><div>{{<content}}</div><div>{{<footer}}</div>");
+
+Which you can call as:
+
+	{{#>layout}}
+	  {>header}}Header{{/header}}
+	  {{>content}}Content{{/content}}
+	  {{>footer}}Footer{{/footer}}
+	{{/layout}}}
 
 Text Encoding
 -

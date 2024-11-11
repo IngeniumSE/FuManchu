@@ -70,6 +70,11 @@ public class RenderContext
 	public ParserVisitor<RenderContext> Visitor { get; private set; }
 
 	/// <summary>
+	/// Gets the partial block content for this context.
+	/// </summary>
+	public IDictionary<string, Block>? PartialBlockContent { get; set; }
+
+	/// <summary>
 	/// Begins a child scope given the specified model.
 	/// </summary>
 	/// <returns>The disposable used to revert the scope.</returns>

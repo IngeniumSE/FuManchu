@@ -13,11 +13,19 @@ using FuManchu.Text;
 using FuManchu.Tokenizer;
 
 using Xunit;
+using Xunit.Abstractions;
 
 using T = FuManchu.Tokenizer.HandlebarsSymbolType;
 
 public class HandlebarsParserFacts
 {
+	readonly ITestOutputHelper _output;
+
+	public HandlebarsParserFacts(ITestOutputHelper output)
+	{
+		_output = output;
+	}
+
 	[Fact]
 	public void CanParseTextDocument()
 	{
@@ -270,12 +278,110 @@ public class HandlebarsParserFacts
 		var factory = new Factory();
 
 		ParserTest("{{>body}}", factory.Document(
-			factory.Partial(
+			factory.Partial("body",
 				factory.MetaCode("{{", T.OpenTag),
 				factory.MetaCode(">", T.RightArrow),
 				factory.Span(SpanKind.Expression, factory.Symbol("body", T.Identifier)),
 				factory.MetaCode("}}", T.CloseTag))
 			));
+	}
+
+	[Fact]
+	public void CanParseZoneTag()
+	{
+		var factory = new Factory();
+
+		ParserTest("{{<body}}", factory.Document(
+			factory.Zone("body",
+				factory.MetaCode("{{", T.OpenTag),
+				factory.MetaCode("<", T.LeftArrow),
+				factory.Span(SpanKind.Expression, factory.Symbol("body", T.Identifier)),
+				factory.MetaCode("}}", T.CloseTag))
+			));
+	}
+
+	[Fact]
+	public void CanParseCompatZoneTag()
+	{
+		var factory = new Factory();
+
+		ParserTest("{{>@partial-block}}", factory.Document(
+			factory.Partial("@partial-block",
+				factory.MetaCode("{{", T.OpenTag),
+				factory.MetaCode(">", T.RightArrow),
+				factory.Span(SpanKind.Expression,
+					factory.Symbol("@", T.At),
+					factory.Symbol("partial", T.Identifier),
+					factory.Symbol("-", T.Dash),
+					factory.Symbol("block", T.Identifier)
+				),
+				factory.MetaCode("}}", T.CloseTag)
+			)
+		));
+	}
+
+	[Fact]
+	public void CanParsePartialBlockTag()
+	{
+		var factory = new Factory();
+
+		ParserTest("{{#>layout}}Content{{/layout}}", factory.Document(
+			factory.PartialBlock("layout",
+				factory.PartialBlockElement("layout",
+					factory.MetaCode("{{", T.OpenTag),
+					factory.MetaCode("#", T.Hash),
+					factory.MetaCode(">", T.RightArrow),
+					factory.Span(SpanKind.Expression, factory.Symbol("layout", T.Identifier)),
+					factory.MetaCode("}}", T.CloseTag)
+				),
+				factory.Text("Content"),
+				factory.PartialBlockElement("layout",
+					factory.MetaCode("{{", T.OpenTag),
+					factory.MetaCode("/", T.Slash),
+					factory.Span(SpanKind.Expression, factory.Symbol("layout", T.Identifier)),
+					factory.MetaCode("}}", T.CloseTag)
+				)
+			)
+		));
+	}
+
+	[Fact]
+	public void CanParsePartialBlockTag_WithNamedZone()
+	{
+		var factory = new Factory();
+
+		ParserTest("{{#>layout}}{{>body}}Content{{/body}}{{/layout}}", factory.Document(
+			factory.PartialBlock("layout",
+				factory.PartialBlockElement("layout",
+					factory.MetaCode("{{", T.OpenTag),
+					factory.MetaCode("#", T.Hash),
+					factory.MetaCode(">", T.RightArrow),
+					factory.Span(SpanKind.Expression, factory.Symbol("layout", T.Identifier)),
+					factory.MetaCode("}}", T.CloseTag)
+				),
+				factory.PartialBlockContent("body",
+					factory.PartialBlockContentElement("body",
+						factory.MetaCode("{{", T.OpenTag),
+						factory.MetaCode(">", T.RightArrow),
+						factory.Span(SpanKind.Expression, factory.Symbol("body", T.Identifier)),
+						factory.MetaCode("}}", T.CloseTag)
+					),
+					factory.Text("Content"),
+					factory.PartialBlockContentElement("body",
+						factory.MetaCode("{{", T.OpenTag),
+						factory.MetaCode("/", T.Slash),
+						factory.Span(SpanKind.Expression, factory.Symbol("body", T.Identifier)),
+						factory.MetaCode("}}", T.CloseTag)
+					)
+				),
+				factory.PartialBlockElement("layout",
+					factory.MetaCode("{{", T.OpenTag),
+					factory.MetaCode("/", T.Slash),
+					factory.Span(SpanKind.Expression, factory.Symbol("layout", T.Identifier)),
+					factory.MetaCode("}}", T.CloseTag)
+				)
+			)
+		));
 	}
 
 	[Fact]
@@ -434,6 +540,12 @@ public class HandlebarsParserFacts
 				var results = context.CompleteParse();
 
 				var comparer = new EquivalanceComparer(output, 0);
+
+				_output.WriteLine("Expected:");
+				_output.WriteLine(document.ToString());
+
+				_output.WriteLine("Actual:");
+				_output.WriteLine(results.Document.ToString());
 
 				Assert.True(comparer.Equals(document, results.Document), output.ToString());
 			}

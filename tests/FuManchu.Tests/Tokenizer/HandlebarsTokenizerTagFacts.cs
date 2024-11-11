@@ -30,6 +30,7 @@ namespace FuManchu.Tests.Tokenizer
 			TestTokenizerSymbols("{{/", T.OpenTag, T.Slash);
 			TestTokenizerSymbols("{{!", T.OpenTag, T.Bang);
 			TestTokenizerSymbols("{{>", T.OpenTag, T.RightArrow);
+			TestTokenizerSymbols("{{<", T.OpenTag, T.LeftArrow);
 			TestTokenizerSymbols("{{^", T.OpenTag, T.Negate);
 			TestTokenizerSymbols("{{&", T.OpenTag, T.Ampersand);
 		}
@@ -59,6 +60,38 @@ namespace FuManchu.Tests.Tokenizer
 		public void RecognisesMapsInTag()
 		{
 			TestTokenizerSymbols("{{#helper one=two three=four}}", T.OpenTag, T.Hash, T.Identifier, T.WhiteSpace, T.Identifier, T.Assign, T.Identifier, T.WhiteSpace, T.Identifier, T.Assign, T.Identifier, T.CloseTag);
+		}
+
+		[Fact]
+		public void RecognizesPartialTag()
+		{
+			TestTokenizerSymbols("{{>people}}", T.OpenTag, T.RightArrow, T.Identifier, T.CloseTag);
+		}
+
+		[Fact]
+		public void RecognizesZoneTag()
+		{
+			TestTokenizerSymbols("{{<people}}", T.OpenTag, T.LeftArrow, T.Identifier, T.CloseTag);
+		}
+
+		[Fact]
+		public void RecognisesCompatZoneTag()
+		{
+			TestTokenizerSymbols("{{>@partial-block}}", T.OpenTag, T.RightArrow, T.At, T.Identifier, T.Dash, T.Identifier, T.CloseTag);
+		}
+
+		[Fact]
+		public void RecognisesCompatZoneTag_WithZoneName()
+		{
+			TestTokenizerSymbols("{{>@partial-block content}}",
+				T.OpenTag, T.RightArrow, T.At, T.Identifier, T.Dash, T.Identifier,
+				T.WhiteSpace, T.Identifier, T.CloseTag);
+		}
+
+		[Fact]
+		public void RecognizesPartialBlockTag()
+		{
+			TestTokenizerSymbols("{{#>people}}", T.OpenTag, T.Hash, T.RightArrow, T.Identifier, T.CloseTag);
 		}
 
 		[Fact]

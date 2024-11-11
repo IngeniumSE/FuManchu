@@ -15,13 +15,14 @@ public class Factory
 	private readonly SourceLocationTracker _tracker = new SourceLocationTracker();
 	private Span? _last;
 
-	public Block Block(BlockType type, string? name = null, params SyntaxTreeNode[] children)
+	public Block Block(BlockType type, string? name = null, bool isZonedPartial = false, params SyntaxTreeNode[] children)
 	{
 		_last = null;
 
 		var builder = new BlockBuilder();
 		builder.Type = type;
 		builder.Name = name;
+		builder.IsPartialBlock = isZonedPartial;
 
 		foreach (var child in children)
 		{
@@ -33,17 +34,17 @@ public class Factory
 
 	public Block Document(params SyntaxTreeNode[] children)
 	{
-		return Block(BlockType.Document, null, children);
+		return Block(BlockType.Document, null, false, children);
 	}
 
 	public Block Tag(string name, params SyntaxTreeNode[] children)
 	{
-		return Block(BlockType.Tag, name, children);
+		return Block(BlockType.Tag, name, false, children);
 	}
 
 	public Block TagElement(string name, params SyntaxTreeNode[] children)
 	{
-		return Block(BlockType.TagElement, name, children);
+		return Block(BlockType.TagElement, name, false, children);
 	}
 
 	public Block Expression(params SyntaxTreeNode[] children)
@@ -55,12 +56,37 @@ public class Factory
 			name = span.Content;
 		}
 
-		return Block(BlockType.Expression, name, children);
+		return Block(BlockType.Expression, name, false, children);
 	}
 
-	public Block Partial(params SyntaxTreeNode[] children)
+	public Block Partial(string name, params SyntaxTreeNode[] children)
 	{
-		return Block(BlockType.Partial, null, children);
+		return Block(BlockType.Partial, name, false, children);
+	}
+
+	public Block Zone(string name, params SyntaxTreeNode[] children)
+	{
+		return Block(BlockType.Zone, name, false, children);
+	}
+
+	public Block PartialBlock(string name, params SyntaxTreeNode[] children)
+	{
+		return Block(BlockType.PartialBlock, name, true, children);
+	}
+
+	public Block PartialBlockElement(string name, params SyntaxTreeNode[] children)
+	{
+		return Block(BlockType.PartialBlockElement, name, true, children);
+	}
+
+	public Block PartialBlockContent(string name, params SyntaxTreeNode[] children)
+	{
+		return Block(BlockType.PartialBlockContent, name, true, children);
+	}
+
+	public Block PartialBlockContentElement(string name, params SyntaxTreeNode[] children)
+	{
+		return Block(BlockType.PartialBlockContentElement, name, true, children);
 	}
 
 	public Span Span(SpanKind kind, params ISymbol[] symbols)

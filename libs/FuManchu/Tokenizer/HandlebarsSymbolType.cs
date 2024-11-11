@@ -30,8 +30,10 @@ public enum HandlebarsSymbolType
 	Tilde,          // ~
 	Hash,           // #,
 	RightArrow,     // >
+	LeftArrow,      // <
 	Negate,         // ^
 	Ampersand,      // &
+	Asterisk,       // *
 	Dash,           // -
 	At,             // @
 
