@@ -320,9 +320,9 @@ Alternatively, you can use the HandlebarsJS syntax:
 
 	Handlebars.RegisterPartial("heading", "<h1>Hello {{>@partial-block}}</h1>");
 
-To call this component, you can now specify the content to be inserted into the partial template:
+To call this component, you can now specify the content to be inserted into the partial template. Not the block syntax `{{#>` instead of `{{>`
 
-	{{>heading}}World{{/heading}}
+	{{#>heading}}World{{/heading}}
 
 Which should render:
 
@@ -339,6 +339,10 @@ Which you can call as:
 	  {{>content}}Content{{/content}}
 	  {{>footer}}Footer{{/footer}}
 	{{/layout}}}
+
+You can still pass arguments and maps to the partial template, but any expressions you use in your zones will be evaluated in the context of the outer template.
+
+	{{#>heading}}{{forename}} {{surname}}{{/heading}}
 
 Text Encoding
 -
