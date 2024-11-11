@@ -85,12 +85,9 @@ public static class TemplateDataEvaluator
 			}
 
 			success = dict.TryGetValue(lookupKey, out value);
-			if (success)
+			if (success && value != null && key.Length > 0 && key.Length != lookupKey.Length)
 			{
-				if (key.Length > 0)
-				{
-					return EvalComplexExpression(value!, key);
-				}
+				return EvalComplexExpression(value!, key);
 			}
 		}
 		else if (indexableObject != null)
