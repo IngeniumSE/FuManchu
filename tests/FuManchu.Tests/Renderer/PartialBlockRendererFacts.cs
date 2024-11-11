@@ -50,4 +50,15 @@ public class PartialBlockRendererFacts : ParserVisitorFactsBase
 
 		RenderTest(template, expected, new { person = new { forename = "Matthew", surname = "Abbott" } });
 	}
+
+	[Fact]
+	public void CanRenderPartialWithArguments_UsingNestedValue()
+	{
+		HandlebarsService.RegisterPartial("body", "{{person.forename}} {{person.surname}}");
+
+		string template = "{{>body person=person}}";
+		string expected = "Matthew Abbott";
+
+		RenderTest(template, expected, new { person = new { forename = "Matthew", surname = "Abbott" } });
+	}
 }

@@ -76,7 +76,22 @@ public static class TemplateDataEvaluator
 
 		if (dict != null)
 		{
-			success = dict.TryGetValue(key, out value);
+			string lookupKey = key;
+			var periodIndex = key.IndexOf('.');
+			if (periodIndex > -1)
+			{
+				lookupKey = key.Substring(0, periodIndex);
+				key = key.Substring(periodIndex + 1);
+			}
+
+			success = dict.TryGetValue(lookupKey, out value);
+			if (success)
+			{
+				if (key.Length > 0)
+				{
+					return EvalComplexExpression(value!, key);
+				}
+			}
 		}
 		else if (indexableObject != null)
 		{
