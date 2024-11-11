@@ -26,7 +26,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="../../Readme.md" Pack="true" PackagePath="\" />
+		<None Include="../../Readme.md" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>
