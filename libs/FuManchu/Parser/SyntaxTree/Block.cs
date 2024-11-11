@@ -200,6 +200,8 @@ public class Block : SyntaxTreeNode
 	/// <inheritdoc />
 	public override string ToString() => $"BLOCK: {{ {Type}, {Name} }}";
 
+#if DEBUG
+
 	public override string DebugToString()
 	{
 		var builder = new StringBuilder();
@@ -207,4 +209,5 @@ public class Block : SyntaxTreeNode
 
 		return builder.ToString();
 	}
+#endif
 }
