@@ -116,4 +116,16 @@ public class PartialBlockRendererFacts : ParserVisitorFactsBase
 
 		RenderTest(template, expected);
 	}
+
+	[Fact]
+	public void CanRenderPartialBlock_WithNestedPartial()
+	{
+		HandlebarsService.RegisterPartial("paragraph", "<p>{{text}}</p>");
+		HandlebarsService.RegisterPartial("layout", "{{<content}}");
+
+		string template = "{{#>layout}}{{>content}}{{>paragraph text=\"Hello World\"}}{{/content}}{{/layout}}";
+		string expected = "<p>Hello World</p>";
+
+		RenderTest(template, expected);
+	}
 }

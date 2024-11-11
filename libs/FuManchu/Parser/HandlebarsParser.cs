@@ -770,7 +770,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			}
 			PutBack(current!);
 			NextToken();
-			if (Context!.CurrentBlock.IsPartialBlock)
+			if (Context!.CurrentBlock.IsPartialBlock && !Context.CurrentBlock.IsPartialBlockContent)
 			{
 				// This is a zone content element, which is actually a block, not a span
 				AtPartialBlockContentTag();
