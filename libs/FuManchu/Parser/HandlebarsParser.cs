@@ -31,6 +31,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 		string? tagName = null;
 		TagDescriptor? descriptor = null;
 		// Start a new block.
+
 		Context.StartBlock(BlockType.Tag);
 
 		using (Context.StartBlock(BlockType.TagElement))
@@ -50,6 +51,14 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			{
 				// Accept the prefix symbol type. tag.
 				AcceptAndMoveNext();
+				// Output that tag as metacode.
+				Output(SpanKind.MetaCode);
+			}
+
+			if (Optional(HandlebarsSymbolType.RightArrow))
+			{
+				Context!.CurrentBlock.IsPartialBlock = true;
+
 				// Output that tag as metacode.
 				Output(SpanKind.MetaCode);
 			}
@@ -132,7 +141,14 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 	{
 		string? tagName = Context!.CurrentBlock.Name;
 
-		using (Context.StartBlock(BlockType.TagElement))
+		var blockType = Context.CurrentBlock switch
+		{
+			{ IsPartialBlock: true, IsPartialBlockContent: true } => BlockType.PartialBlockContentElement,
+			{ IsPartialBlock: true } => BlockType.PartialBlockElement,
+			_ => BlockType.TagElement
+		};
+
+		using (Context.StartBlock(blockType))
 		{
 			// Accept the open tag.
 			AcceptAndMoveNext();
@@ -337,6 +353,294 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			// Output the first part as an expression.
 			Output(SpanKind.Expression);
 
+			tagName = LastSpanContent();
+			Context.CurrentBlock.Name = tagName;
+
+			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
+			{
+				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
+				{
+					// Accept all the whitespace.
+					AcceptAll(HandlebarsSymbolType.WhiteSpace);
+					// Take all the whitespace, and output that.
+					Output(SpanKind.WhiteSpace);
+				}
+
+				if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+				{
+					// We're in a parameterised argument (e.g. one=two
+					AcceptAndMoveNext();
+					// Accept everything until the next whitespace or closing tag.
+					AcceptUntil(HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
+					// Output this as a map.
+					Output(SpanKind.Map);
+				}
+				else
+				{
+					// Accept everything until the next whitespace or closing tag.
+					AcceptUntil(HandlebarsSymbolType.Assign, HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
+					if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+					{
+						continue;
+					}
+					// Output this as a map.
+					Output(SpanKind.Parameter);
+				}
+			}
+
+			if (Optional(HandlebarsSymbolType.Tilde))
+			{
+				// Output the tilde.
+				Output(SpanKind.MetaCode);
+			}
+
+			// Accept the closing tag.
+			AcceptAndMoveNext();
+			// Output this as metacode.
+			Output(SpanKind.MetaCode);
+		}
+	}
+
+	/// <summary>
+	/// Parses a partial block tag.
+	/// </summary>
+	public void AtPartialBlockTag()
+	{
+		var parent = Context!.CurrentBlock;
+
+		string? tagName = null;
+		TagDescriptor? descriptor = null;
+		// Start a new block.
+
+		Context.StartBlock(BlockType.PartialBlock);
+		Context.CurrentBlock.IsPartialBlock = true;
+
+		using (Context.StartBlock(BlockType.PartialBlockElement))
+		{
+			Context.CurrentBlock.IsPartialBlock = true;
+
+			// Accept the open tag.
+			AcceptAndMoveNext();
+			// Output that tag as metacode.
+			Output(SpanKind.MetaCode);
+
+			if (Optional(HandlebarsSymbolType.Tilde))
+			{
+				// Output the tilde.
+				Output(SpanKind.MetaCode);
+			}
+
+			if (Required(HandlebarsSymbolType.Hash, true))
+			{
+				// Accept the prefix symbol type. tag.
+				AcceptAndMoveNext();
+				// Output that tag as metacode.
+				Output(SpanKind.MetaCode);
+			}
+
+			if (Required(HandlebarsSymbolType.RightArrow, true))
+			{
+				// Accept the prefix symbol type. tag.
+				AcceptAndMoveNext();
+				// Output that tag as metacode.
+				Output(SpanKind.MetaCode);
+			}
+
+			// Accept everything until either the close of the tag, or the first element of whitespace.
+			AcceptUntil(HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag);
+			// Output the first part as an expression.
+			Output(SpanKind.Expression);
+
+			// Get the tag name and set it for the block.
+			tagName = LastSpanContent();
+			descriptor = null;
+
+			Context.CurrentBlock.Name = tagName;
+			Context.CurrentBlock.Descriptor = descriptor;
+
+			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
+			{
+				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
+				{
+					// Accept all the whitespace.
+					AcceptAll(HandlebarsSymbolType.WhiteSpace);
+					// Take all the whitespace, and output that.
+					Output(SpanKind.WhiteSpace);
+				}
+
+				if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+				{
+					// We're in a parameterised argument (e.g. one=two
+					AcceptAndMoveNext();
+					// Accept everything until the next whitespace or closing tag.
+					AcceptUntil(HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
+					// Output this as a map.
+					Output(SpanKind.Map);
+				}
+				else
+				{
+					// Accept everything until the next whitespace or closing tag.
+					AcceptUntil(HandlebarsSymbolType.Assign, HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
+					if (CurrentSymbol.Type != HandlebarsSymbolType.Assign)
+					{
+						// Output this as a parameter.
+						Output(SpanKind.Parameter);
+					}
+				}
+			}
+
+			if (Optional(HandlebarsSymbolType.Tilde))
+			{
+				// Output the tilde.
+				Output(SpanKind.MetaCode);
+			}
+
+			// Accept the closing tag.
+			AcceptAndMoveNext();
+			// Output this as metacode.
+			Output(SpanKind.MetaCode);
+		}
+
+		Context.CurrentBlock.Name = tagName;
+		Context.CurrentBlock.Descriptor = descriptor;
+
+		// Switch back to parsing the content of the block.
+		ParseBlock();
+	}
+
+	/// <summary>
+	/// Parses a partial block tag.
+	/// </summary>
+	public void AtPartialBlockContentTag()
+	{
+		var parent = Context!.CurrentBlock;
+
+		string? tagName = null;
+		TagDescriptor? descriptor = null;
+		// Start a new block.
+
+		Context.StartBlock(BlockType.PartialBlockContent);
+		Context.CurrentBlock.IsPartialBlockContent = Context.CurrentBlock.IsPartialBlock = true;
+
+		using (Context.StartBlock(BlockType.PartialBlockContentElement))
+		{
+			Context.CurrentBlock.IsPartialBlockContent = Context.CurrentBlock.IsPartialBlock = true;
+
+			// Accept the open tag.
+			AcceptAndMoveNext();
+			// Output that tag as metacode.
+			Output(SpanKind.MetaCode);
+
+			if (Optional(HandlebarsSymbolType.Tilde))
+			{
+				// Output the tilde.
+				Output(SpanKind.MetaCode);
+			}
+
+			if (Required(HandlebarsSymbolType.RightArrow, true))
+			{
+				// Accept the prefix symbol type. tag.
+				AcceptAndMoveNext();
+				// Output that tag as metacode.
+				Output(SpanKind.MetaCode);
+			}
+
+			// Accept everything until either the close of the tag, or the first element of whitespace.
+			AcceptUntil(HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag);
+			// Output the first part as an expression.
+			Output(SpanKind.Expression);
+
+			// Get the tag name and set it for the block.
+			tagName = LastSpanContent();
+			descriptor = null;
+
+			Context.CurrentBlock.Name = tagName;
+			Context.CurrentBlock.Descriptor = descriptor;
+
+			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
+			{
+				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
+				{
+					// Accept all the whitespace.
+					AcceptAll(HandlebarsSymbolType.WhiteSpace);
+					// Take all the whitespace, and output that.
+					Output(SpanKind.WhiteSpace);
+				}
+
+				if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+				{
+					// We're in a parameterised argument (e.g. one=two
+					AcceptAndMoveNext();
+					// Accept everything until the next whitespace or closing tag.
+					AcceptUntil(HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
+					// Output this as a map.
+					Output(SpanKind.Map);
+				}
+				else
+				{
+					// Accept everything until the next whitespace or closing tag.
+					AcceptUntil(HandlebarsSymbolType.Assign, HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
+					if (CurrentSymbol.Type != HandlebarsSymbolType.Assign)
+					{
+						// Output this as a parameter.
+						Output(SpanKind.Parameter);
+					}
+				}
+			}
+
+			if (Optional(HandlebarsSymbolType.Tilde))
+			{
+				// Output the tilde.
+				Output(SpanKind.MetaCode);
+			}
+
+			// Accept the closing tag.
+			AcceptAndMoveNext();
+			// Output this as metacode.
+			Output(SpanKind.MetaCode);
+		}
+
+		Context.CurrentBlock.Name = tagName;
+		Context.CurrentBlock.Descriptor = descriptor;
+
+		// Switch back to parsing the content of the block.
+		ParseBlock();
+	}
+
+	/// <summary>
+	/// Parses an expression.
+	/// </summary>
+	public void AtZoneTag()
+	{
+		string? tagName = null;
+
+		using (var block = Context!.StartBlock(BlockType.Zone))
+		{
+			// Accept the open tag.
+			AcceptAndMoveNext();
+			// Output that tag as metacode.
+			Output(SpanKind.MetaCode);
+
+			if (Optional(HandlebarsSymbolType.Tilde))
+			{
+				// Output the tilde.
+				Output(SpanKind.MetaCode);
+			}
+
+			// Accept the left arrow <.
+			AcceptAndMoveNext();
+			// Output that tag as metacode.
+			Output(SpanKind.MetaCode);
+
+			// Accept everything until either the close of the tag, or the first element of whitespace.
+			AcceptUntil(HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
+			// Output the first part as an expression.
+			Output(SpanKind.Expression);
+
+			// Get the tag name and set it for the block.
+			tagName = LastSpanContent();
+			Context.CurrentBlock.Name = tagName;
+
 			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
 			{
 				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
@@ -399,16 +703,36 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 
 		if (CurrentSymbol.Type == HandlebarsSymbolType.Hash)
 		{
+			var hash = CurrentSymbol;
+			bool isPartialBlock = false;
+
+			NextToken();
+			if (CurrentSymbol.Type == HandlebarsSymbolType.RightArrow)
+			{
+				isPartialBlock = true;
+			}
+			PutBack(CurrentSymbol); // Put back the > character
+
 			// Put the opening tag back.
-			PutBack(CurrentSymbol);
+			PutBack(hash); // Put back the # character
 			if (tilde != null)
 			{
 				PutBack(tilde);
 			}
-			PutBack(current!);
+
+			PutBack(current!); // Put back the opening tag symbol
 			NextToken();
-			// We're at a block tag {{#hello}} etc.
-			AtBlockTag();
+
+			if (isPartialBlock)
+			{
+				// We're at a partial block tag {{#>hello}} etc.
+				AtPartialBlockTag();
+			}
+			else
+			{
+				// We're at a block tag {{#hello}} etc.
+				AtBlockTag();
+			}
 		}
 		else if (CurrentSymbol.Type == HandlebarsSymbolType.Bang)
 		{
@@ -446,8 +770,29 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			}
 			PutBack(current!);
 			NextToken();
-			// We're at a partial include tag {{>body}}
-			AtPartialTag();
+			if (Context!.CurrentBlock.IsPartialBlock)
+			{
+				// This is a zone content element, which is actually a block, not a span
+				AtPartialBlockContentTag();
+			}
+			else
+			{
+				// We're at a partial include tag {{>body}}
+				AtPartialTag();
+			}
+		}
+		else if (CurrentSymbol.Type == HandlebarsSymbolType.LeftArrow)
+		{
+			// Put the opening tag back.
+			PutBack(CurrentSymbol);
+			if (tilde != null)
+			{
+				PutBack(tilde);
+			}
+			PutBack(current!);
+			NextToken();
+			// We're at a zone include tag {{<body}}
+			AtZoneTag();
 		}
 		else if (CurrentSymbol.Type == HandlebarsSymbolType.Negate)
 		{

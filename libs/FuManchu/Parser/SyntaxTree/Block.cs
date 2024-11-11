@@ -21,7 +21,9 @@ public class Block : SyntaxTreeNode
 	/// </summary>
 	/// <param name="source">The source block builder.</param>
 	public Block(BlockBuilder source)
-		: this(source.Type, source.Name, source.Children, source.Descriptor)
+		: this(
+				source.Type, source.Name, source.Children, source.Descriptor,
+				source.IsPartialBlock, source.IsPartialBlockContent)
 	{
 		source.Reset();
 	}
@@ -33,12 +35,22 @@ public class Block : SyntaxTreeNode
 	/// <param name="name">The block name.</param>
 	/// <param name="contents">The child contents.</param>
 	/// <param name="descriptor">The tag descriptor.</param>
-	protected Block(BlockType type, string? name, IEnumerable<SyntaxTreeNode> contents, TagDescriptor? descriptor)
+	/// <param name="isPartialBlock">Whether the block is a partial block.</param>
+	/// <param name="isImplicitPartialBlockContent">Whether the block is the implicit partial block content.</param>
+	protected Block(
+		BlockType type,
+		string? name,
+		IReadOnlyList<SyntaxTreeNode> contents,
+		TagDescriptor? descriptor,
+		bool isPartialBlock,
+		bool isImplicitPartialBlockContent)
 	{
 		Type = type;
 		Name = name;
 		Children = contents;
 		Descriptor = descriptor;
+		IsPartialBlock = isPartialBlock;
+		IsImplicitPartialBlockContent = isImplicitPartialBlockContent;
 
 		foreach (var node in contents)
 		{
@@ -49,7 +61,7 @@ public class Block : SyntaxTreeNode
 	/// <summary>
 	/// Gets the children of this block.
 	/// </summary>
-	public IEnumerable<SyntaxTreeNode> Children { get; private set; }
+	public IReadOnlyCollection<SyntaxTreeNode> Children { get; private set; }
 
 	/// <summary>
 	/// Gets or sets the tag descriptor.
@@ -61,6 +73,16 @@ public class Block : SyntaxTreeNode
 	{
 		get { return true; }
 	}
+
+	/// <summary>
+	/// Gets or sets whether this block is a partial block.
+	/// </summary>
+	public bool IsPartialBlock { get; private set; }
+
+	/// <summary>
+	/// Gets or sets whether this block is the partial block content.
+	/// </summary>
+	public bool IsImplicitPartialBlockContent { get; private set; }
 
 	/// <inheritdoc />
 	public override int Length
@@ -165,7 +187,7 @@ public class Block : SyntaxTreeNode
 	/// Replace the child nodes.
 	/// </summary>
 	/// <param name="children">The new set of children.</param>
-	internal void ReplaceChildren(IEnumerable<SyntaxTreeNode> children)
+	internal void ReplaceChildren(IReadOnlyCollection<SyntaxTreeNode> children)
 	{
 		if (children == null)
 		{
@@ -178,7 +200,6 @@ public class Block : SyntaxTreeNode
 	/// <inheritdoc />
 	public override string ToString() => $"BLOCK: {{ {Type}, {Name} }}";
 
-#if DEBUG
 	public override string DebugToString()
 	{
 		var builder = new StringBuilder();
@@ -186,5 +207,4 @@ public class Block : SyntaxTreeNode
 
 		return builder.ToString();
 	}
-#endif
 }

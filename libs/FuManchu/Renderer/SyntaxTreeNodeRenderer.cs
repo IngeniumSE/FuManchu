@@ -106,10 +106,10 @@ public abstract class SyntaxTreeNodeRenderer<T> : ISyntaxTreeNodeRenderer<T> whe
 	/// <param name="block">The target block.</param>
 	/// <param name="context">The render context.</param>
 	/// <returns>The set of arguments and mapped parameters.</returns>
-	protected virtual Tuple<object?[], Dictionary<string, object?>> GetArgumentsAndMappedParameters(Block block, RenderContext context)
+	protected virtual Tuple<object?[], Map> GetArgumentsAndMappedParameters(Block block, RenderContext context)
 	{
 		var arguments = new List<object?>();
-		var maps = new Dictionary<string, object?>();
+		var maps = new Map();
 
 		var items = block.Children.OfType<Span>().Where(c => c.Kind == SpanKind.Parameter || c.Kind == SpanKind.Map);
 

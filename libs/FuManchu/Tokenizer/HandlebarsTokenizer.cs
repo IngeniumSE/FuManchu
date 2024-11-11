@@ -129,6 +129,18 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 					// We've matched a > character - this is the start of a reference to a partial template.
 					return Transition(EndSymbol(HandlebarsSymbolType.RightArrow), () => ContinueTagContent(false));
 				}
+			case '<':
+				{
+					if (raw)
+					{
+						// This is an invalid tag, so set and error and exit.
+						CurrentErrors.Add(new Error("Unexpected '<' in raw tag.", CurrentLocation));
+						return Transition(Stop);
+					}
+					TakeCurrent();
+					// We've matched a > character - this is the start of a reference to a partial template.
+					return Transition(EndSymbol(HandlebarsSymbolType.LeftArrow), () => ContinueTagContent(false));
+				}
 			case '^':
 				{
 					if (raw)
@@ -150,7 +162,12 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 						return Transition(Stop);
 					}
 					TakeCurrent();
-					// We've matched a ^ character - this is the start of a negation.
+					if (CurrentCharacter == '>')
+					{
+						// We've matched a > character - this is the start of a partial block tag
+						return Transition(EndSymbol(HandlebarsSymbolType.Hash), () => BeginTagContent(false));
+					}
+					// We've matched a # character - this is the start of a block tag
 					return Transition(EndSymbol(HandlebarsSymbolType.Hash), () => ContinueTagContent(false));
 				}
 			case '&':
@@ -282,6 +299,13 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 				{
 					// We've reached a closing tag, so transition away.
 					return Transition(() => EndTag(raw));
+				}
+			case '-':
+				{
+					// This could be a special case, like 'partial-block'.
+					TakeCurrent();
+
+					return Stay(EndSymbol(HandlebarsSymbolType.Dash));
 				}
 			default:
 				{

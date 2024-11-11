@@ -9,6 +9,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<AssemblyName>FuManchu</AssemblyName>
 		<PackageId>FuManchu</PackageId>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>fumanchu;handlebars</PackageTags>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>git://github.com/IngeniumSE/FuManchu</RepositoryUrl>
@@ -22,6 +23,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="MinVer" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="../../Readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>
