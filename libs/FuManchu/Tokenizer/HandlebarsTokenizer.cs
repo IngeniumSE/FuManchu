@@ -5,6 +5,7 @@ namespace FuManchu.Tokenizer;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using FuManchu.Parser;
 using FuManchu.Text;
@@ -14,6 +15,24 @@ using FuManchu.Text;
 /// </summary>
 public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolType>
 {
+	const int StopState = -1;
+
+	public enum HandlebarsTokenizerStates
+	{
+		Data = 0,
+		WhiteSpace,
+		BeginTag,
+		BeginTagContent,
+		BeginTagContentRaw,
+		ContinueTagContent,
+		ContinueTagContentRaw,
+		EndTag,
+		EndTagRaw,
+		BeginComment,
+		ContinueComment,
+		ContinueCommentExplicitTerminal
+	}
+
 	/// <summary>
 	/// Initializes a new instance of the <see cref="HandlebarsTokenizer"/> class.
 	/// </summary>
@@ -21,13 +40,39 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 	public HandlebarsTokenizer(ITextDocument source)
 		: base(source)
 	{
-		CurrentState = Data;
+		base.CurrentState = StartState;
 	}
 
 	/// <inheritdoc />
-	protected override State StartState
+	protected override int StartState { get; } = (int)HandlebarsTokenizerStates.Data;
+
+	new HandlebarsTokenizerStates? CurrentState => (HandlebarsTokenizerStates?)base.CurrentState;
+
+	protected override StateResult Dispatch()
 	{
-		get { return Data; }
+		if (base.CurrentState == StopState)
+		{
+			return Stop();
+		}
+
+		switch (CurrentState)
+		{
+			case HandlebarsTokenizerStates.Data: return Data();
+			case HandlebarsTokenizerStates.WhiteSpace: return WhiteSpace();
+			case HandlebarsTokenizerStates.BeginTag: return BeginTag();
+			case HandlebarsTokenizerStates.BeginTagContent: return BeginTagContent(false);
+			case HandlebarsTokenizerStates.BeginTagContentRaw: return BeginTagContent(true);
+			case HandlebarsTokenizerStates.ContinueTagContent: return ContinueTagContent(false);
+			case HandlebarsTokenizerStates.ContinueTagContentRaw: return ContinueTagContent(true);
+			case HandlebarsTokenizerStates.EndTag: return EndTag(false);
+			case HandlebarsTokenizerStates.EndTagRaw: return EndTag(true);
+			case HandlebarsTokenizerStates.BeginComment: return BeginComment();
+			case HandlebarsTokenizerStates.ContinueComment: return ContinueComment(false);
+			case HandlebarsTokenizerStates.ContinueCommentExplicitTerminal: return ContinueComment(true);
+			default:
+				Debug.Fail("Invalid tokenizer state.");
+				return default;
+		}
 	}
 
 	#region Tag Structure
@@ -39,10 +84,10 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 	{
 		if (CurrentCharacter == '-' && Peek() == '-')
 		{
-			return Transition(() => ContinueComment(true));
+			return Transition((int)HandlebarsTokenizerStates.ContinueCommentExplicitTerminal);
 		}
 
-		return Transition(() => ContinueComment(false));
+		return Transition((int)HandlebarsTokenizerStates.ContinueComment);
 	}
 
 	/// <summary>
@@ -58,7 +103,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 			CurrentErrors.Add(new Error("Expected '{'", CurrentLocation));
 
 			// We can't process this any more, so stop.
-			return Transition(Stop);
+			return Transition(StopState);
 		}
 
 		TakeCurrent();
@@ -68,7 +113,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 			CurrentErrors.Add(new Error("Expected '{'", CurrentLocation));
 
 			// We can't process this any more, so stop.
-			return Transition(Stop);
+			return Transition(StopState);
 		}
 
 		TakeCurrent();
@@ -83,11 +128,13 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 		else if (CurrentCharacter == '#')
 		{
 			// We're at the start of a block tag.
-			return Transition(EndSymbol(type), () => BeginTagContent(false));
+			return Transition(EndSymbol(type), (int)HandlebarsTokenizerStates.BeginTagContent);
 		}
 
 		// Transition to the start of tag content.
-		return Transition(EndSymbol(type), () => BeginTagContent(type == HandlebarsSymbolType.RawOpenTag));
+		return Transition(EndSymbol(type), type == HandlebarsSymbolType.RawOpenTag
+			? (int)HandlebarsTokenizerStates.BeginTagContentRaw
+			: (int)HandlebarsTokenizerStates.BeginTagContent);
 	}
 
 	/// <summary>
@@ -111,11 +158,11 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 					{
 						// This is an invalid tag, so set and error and exit.
 						CurrentErrors.Add(new Error("Unexpected '!' in raw tag.", CurrentLocation));
-						return Transition(Stop);
+						return Transition(StopState);
 					}
 					TakeCurrent();
 					// We've matched a ! character - this is the start of a comment.
-					return Transition(EndSymbol(HandlebarsSymbolType.Bang), BeginComment);
+					return Transition(EndSymbol(HandlebarsSymbolType.Bang), (int)HandlebarsTokenizerStates.BeginComment);
 				}
 			case '>':
 				{
@@ -123,11 +170,11 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 					{
 						// This is an invalid tag, so set and error and exit.
 						CurrentErrors.Add(new Error("Unexpected '>' in raw tag.", CurrentLocation));
-						return Transition(Stop);
+						return Transition(StopState);
 					}
 					TakeCurrent();
 					// We've matched a > character - this is the start of a reference to a partial template.
-					return Transition(EndSymbol(HandlebarsSymbolType.RightArrow), () => ContinueTagContent(false));
+					return Transition(EndSymbol(HandlebarsSymbolType.RightArrow), (int)HandlebarsTokenizerStates.ContinueTagContent);
 				}
 			case '<':
 				{
@@ -135,11 +182,11 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 					{
 						// This is an invalid tag, so set and error and exit.
 						CurrentErrors.Add(new Error("Unexpected '<' in raw tag.", CurrentLocation));
-						return Transition(Stop);
+						return Transition(StopState);
 					}
 					TakeCurrent();
 					// We've matched a > character - this is the start of a reference to a partial template.
-					return Transition(EndSymbol(HandlebarsSymbolType.LeftArrow), () => ContinueTagContent(false));
+					return Transition(EndSymbol(HandlebarsSymbolType.LeftArrow), (int)HandlebarsTokenizerStates.ContinueTagContent);
 				}
 			case '^':
 				{
@@ -147,11 +194,11 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 					{
 						// This is an invalid tag, so set and error and exit.
 						CurrentErrors.Add(new Error("Unexpected '^' in raw tag.", CurrentLocation));
-						return Transition(Stop);
+						return Transition(StopState);
 					}
 					TakeCurrent();
 					// We've matched a ^ character - this is the start of a negation.
-					return Transition(EndSymbol(HandlebarsSymbolType.Negate), () => ContinueTagContent(false));
+					return Transition(EndSymbol(HandlebarsSymbolType.Negate), (int)HandlebarsTokenizerStates.ContinueTagContent);
 				}
 			case '#':
 				{
@@ -159,33 +206,33 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 					{
 						// This is an invalid tag, so set and error and exit.
 						CurrentErrors.Add(new Error("Unexpected '#' in raw tag.", CurrentLocation));
-						return Transition(Stop);
+						return Transition(StopState);
 					}
 					TakeCurrent();
 					if (CurrentCharacter == '>')
 					{
 						// We've matched a > character - this is the start of a partial block tag
-						return Transition(EndSymbol(HandlebarsSymbolType.Hash), () => BeginTagContent(false));
+						return Transition(EndSymbol(HandlebarsSymbolType.Hash), (int)HandlebarsTokenizerStates.BeginTagContent);
 					}
 					// We've matched a # character - this is the start of a block tag
-					return Transition(EndSymbol(HandlebarsSymbolType.Hash), () => ContinueTagContent(false));
+					return Transition(EndSymbol(HandlebarsSymbolType.Hash), (int)HandlebarsTokenizerStates.ContinueTagContent);
 				}
 			case '&':
 				{
 					TakeCurrent();
 					// We've matched a & character
-					return Transition(EndSymbol(HandlebarsSymbolType.Ampersand), () => ContinueTagContent(false));
+					return Transition(EndSymbol(HandlebarsSymbolType.Ampersand), (int)HandlebarsTokenizerStates.ContinueTagContent);
 				}
 			case '@':
 				{
 					TakeCurrent();
 					// We've matched a variable reference character.
-					return Transition(EndSymbol(HandlebarsSymbolType.At), () => ContinueTagContent(false));
+					return Transition(EndSymbol(HandlebarsSymbolType.At), (int)HandlebarsTokenizerStates.ContinueTagContent);
 				}
 			default:
 				{
 					// Transition to the tag content.
-					return Transition(() => ContinueTagContent(raw));
+					return Transition(raw ? (int)HandlebarsTokenizerStates.ContinueTagContentRaw : (int)HandlebarsTokenizerStates.ContinueTagContent);
 				}
 		}
 	}
@@ -205,7 +252,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 			if (CurrentCharacter == '}' && Peek() == '}')
 			{
 				// We've finished at an explicit -- sequence.
-				return Transition(EndSymbol(HandlebarsSymbolType.Comment), () => EndTag(false));
+				return Transition(EndSymbol(HandlebarsSymbolType.Comment), (int)HandlebarsTokenizerStates.EndTag);
 			}
 
 			// Stay at the current state.
@@ -213,7 +260,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 		}
 
 		TakeUntil(c => c == '}' && Peek() == '}');
-		return Transition(EndSymbol(HandlebarsSymbolType.Comment), () => EndTag(false));
+		return Transition(EndSymbol(HandlebarsSymbolType.Comment), (int)HandlebarsTokenizerStates.EndTag);
 	}
 
 	/// <summary>
@@ -279,7 +326,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 				{
 					TakeCurrent();
 					// We've reached a '~' character, so jump to the end of the tag.
-					return Transition(EndSymbol(HandlebarsSymbolType.Tilde), () => EndTag(raw));
+					return Transition(EndSymbol(HandlebarsSymbolType.Tilde), raw ? (int)HandlebarsTokenizerStates.EndTagRaw : (int)HandlebarsTokenizerStates.EndTag);
 				}
 			case '"':
 			case '\'':
@@ -298,7 +345,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 			case '}':
 				{
 					// We've reached a closing tag, so transition away.
-					return Transition(() => EndTag(raw));
+					return Transition(raw ? (int)HandlebarsTokenizerStates.EndTagRaw : (int)HandlebarsTokenizerStates.EndTag);
 				}
 			case '-':
 				{
@@ -310,7 +357,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 			default:
 				{
 					CurrentErrors.Add(new Error("Unexpected character: " + CurrentCharacter, CurrentLocation));
-					return Transition(Stop);
+					return Transition(StopState);
 				}
 		}
 	}
@@ -327,7 +374,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 			CurrentErrors.Add(new Error("Expected '}'", CurrentLocation));
 
 			// We can't process this any more, so stop.
-			return Transition(Stop);
+			return Transition(StopState);
 		}
 
 		TakeCurrent();
@@ -337,7 +384,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 			CurrentErrors.Add(new Error("Expected '}'", CurrentLocation));
 
 			// We can't process this any more, so stop.
-			return Transition(Stop);
+			return Transition(StopState);
 		}
 
 		TakeCurrent();
@@ -347,18 +394,18 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 			CurrentErrors.Add(new Error("Expected '}'", CurrentLocation));
 
 			// We can't process this any more, so stop.
-			return Transition(Stop);
+			return Transition(StopState);
 		}
 
 		if (CurrentCharacter == '}' && raw)
 		{
 			TakeCurrent();
 			// We're done processing this '}}}' sequence, so let's finish here and return to the Data state.
-			return Transition(EndSymbol(HandlebarsSymbolType.RawCloseTag), Data);
+			return Transition(EndSymbol(HandlebarsSymbolType.RawCloseTag), (int)HandlebarsTokenizerStates.Data);
 		}
 
 		// We're done processing this '}}' sequence, so let's finish here and return to the Data state.
-		return Transition(EndSymbol(HandlebarsSymbolType.CloseTag), Data);
+		return Transition(EndSymbol(HandlebarsSymbolType.CloseTag), (int)HandlebarsTokenizerStates.Data);
 	}
 	#endregion
 
@@ -378,7 +425,7 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 		{
 			if (HaveContent)
 			{
-				return Transition(EndSymbol(HandlebarsSymbolType.Text), Stop);
+				return Transition(EndSymbol(HandlebarsSymbolType.Text), StopState);
 			}
 
 			return Stop();
@@ -388,10 +435,10 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 		{
 			if (HaveContent)
 			{
-				return Transition(EndSymbol(HandlebarsSymbolType.Text), WhiteSpace);
+				return Transition(EndSymbol(HandlebarsSymbolType.Text), (int)HandlebarsTokenizerStates.WhiteSpace);
 			}
 
-			return Transition(WhiteSpace);
+			return Transition((int)HandlebarsTokenizerStates.WhiteSpace);
 		}
 
 		TakeUntil(c => c == '{' || ParserHelpers.IsWhiteSpace(c));
@@ -413,13 +460,13 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 			if (Peek() == '{')
 			{
 				// We're at the start of a tag.
-				return Transition(EndSymbol(HandlebarsSymbolType.Text), BeginTag);
+				return Transition(EndSymbol(HandlebarsSymbolType.Text), (int)HandlebarsTokenizerStates.BeginTag);
 			}
 		}
 		if (Peek() == '{')
 		{
 			// We're at the start of a tag.
-			return Transition(BeginTag);
+			return Transition((int)HandlebarsTokenizerStates.BeginTag);
 		}
 
 		TakeCurrent();
@@ -573,9 +620,9 @@ public class HandlebarsTokenizer : Tokenizer<HandlebarsSymbol, HandlebarsSymbolT
 		TakeUntil(c => !ParserHelpers.IsWhiteSpace(c) && !ParserHelpers.IsNewLine(c));
 		if (HaveContent)
 		{
-			return Transition(EndSymbol(HandlebarsSymbolType.WhiteSpace), Data);
+			return Transition(EndSymbol(HandlebarsSymbolType.WhiteSpace), (int)HandlebarsTokenizerStates.Data);
 		}
 
-		return Transition(Data);
+		return Transition((int)HandlebarsTokenizerStates.Data);
 	}
 }

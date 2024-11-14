@@ -128,8 +128,8 @@ public class RenderingParserVisitor : ParserVisitor<RenderContext>
 	/// <param name="span">The metacode span.</param>
 	public void VisitMetaCodeSpan(Span span)
 	{
-		var symbol = span.Symbols.FirstOrDefault() as HandlebarsSymbol;
-		if (symbol == null)
+		var symbol = span.Symbols.FirstOrDefault();
+		if (!symbol.HasValue)
 		{
 			VisitError(new Error("Expected span to have at least 1 symbol", span.Start, span.Content!.Length));
 

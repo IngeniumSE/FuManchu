@@ -10,21 +10,18 @@ using FuManchu.Text;
 /// <summary>
 /// Provides a simplified abstraction of a tokenizer.
 /// </summary>
-public class TokenizerView<TTokenizer, TSymbol, TSymbolType>
-	where TTokenizer : Tokenizer<TSymbol, TSymbolType>
-	where TSymbol : SymbolBase<TSymbolType>
-	where TSymbolType : struct
+public class TokenizerView
 {
 	/// <summary>
-	/// Initialises a new instance of <see cref="TokenizerView{TTokenizer,TSymbol,TSymbolType}"/>
+	/// Initialises a new instance of <see cref="TokenizerView"/>
 	/// </summary>
 	/// <param name="tokenizer">The tokenizer.</param>
-	public TokenizerView(TTokenizer tokenizer) => Tokenizer = tokenizer;
+	public TokenizerView(HandlebarsTokenizer tokenizer) => Tokenizer = tokenizer;
 
 	/// <summary>
 	/// Gets the current symbol.
 	/// </summary>
-	public TSymbol? Current { get; private set; }
+	public HandlebarsSymbol? Current { get; private set; }
 
 	/// <summary>
 	/// Gets whether we are at the end of the source.
@@ -39,7 +36,7 @@ public class TokenizerView<TTokenizer, TSymbol, TSymbolType>
 	/// <summary>
 	/// Gets the tokenizer.
 	/// </summary>
-	public TTokenizer Tokenizer { get; private set; }
+	public HandlebarsTokenizer Tokenizer { get; private set; }
 
 	/// <summary>
 	/// Reads the next symbol from the document
@@ -56,7 +53,7 @@ public class TokenizerView<TTokenizer, TSymbol, TSymbolType>
 	/// Resets the source back to the beginning of the symbol.
 	/// </summary>
 	/// <param name="symbol">The symbol.</param>
-	public void PutBack(TSymbol symbol)
+	public void PutBack(HandlebarsSymbol symbol)
 	{
 		if (Source.Position != symbol.Start.Absolute + symbol.Content.Length)
 		{

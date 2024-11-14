@@ -111,4 +111,12 @@ public class SeekableTextReader : TextReader, ITextDocument
 			_location = _buffer.EndLocation;
 		}
 	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing)
+		{
+			_buffer.Dispose();
+		}
+	}
 }

@@ -8,10 +8,8 @@ using System.Text;
 /// <summary>
 /// Represents a line of text.
 /// </summary>
-public class TextLine
+public class TextLine : IDisposable
 {
-	private readonly StringBuilder _builder = new StringBuilder();
-
 	/// <summary>
 	/// Initializes a new instance of the <see cref="TextLine"/> class.
 	/// </summary>
@@ -21,12 +19,14 @@ public class TextLine
 	{
 		Start = start;
 		Index = index;
+
+		Content = StringBuilderPool.Rent();
 	}
 
 	/// <summary>
 	/// Gets the string builder.
 	/// </summary>
-	public StringBuilder Content { get { return _builder; } }
+	public StringBuilder Content { get; }
 
 	/// <summary>
 	/// Gets the end.
@@ -59,5 +59,13 @@ public class TextLine
 	public bool Contains(int index)
 	{
 		return index < End && index >= Start;
+	}
+
+	public void Dispose()
+	{
+		if (Content is not null)
+		{
+			StringBuilderPool.Release(Content);
+		}
 	}
 }

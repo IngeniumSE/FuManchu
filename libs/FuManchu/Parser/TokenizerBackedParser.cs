@@ -14,18 +14,12 @@ using FuManchu.Tokenizer;
 /// <summary>
 /// Represents a parser backed by a tokenizer.
 /// </summary>
-/// <typeparam name="TTokenizer">The type of the tokenizer.</typeparam>
-/// <typeparam name="TSymbol">The type of the symbol.</typeparam>
-/// <typeparam name="TSymbolType">The type of the symbol type.</typeparam>
-public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : ParserBase
-	where TTokenizer : Tokenizer<TSymbol, TSymbolType>
-	where TSymbol : SymbolBase<TSymbolType>
-	where TSymbolType : struct
+public abstract class TokenizerBackedParser : ParserBase
 {
-	private TokenizerView<TTokenizer, TSymbol, TSymbolType>? _tokenizer;
+	private TokenizerView? _tokenizer;
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="TokenizerBackedParser{TTokenizer, TSymbol, TSymbolType}"/> class.
+	/// Initializes a new instance of the <see cref="TokenizerBackedParser"/> class.
 	/// </summary>
 	protected TokenizerBackedParser()
 	{
@@ -37,13 +31,13 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	protected SourceLocation CurrentLocation
 	{
-		get { return (EndOfFile || CurrentSymbol == null) ? Context!.Source.Location : CurrentSymbol.Start; }
+		get { return (EndOfFile || !CurrentSymbol.HasValue) ? Context!.Source.Location : CurrentSymbol.Value.Start; }
 	}
 
 	/// <summary>
 	/// Gets the current symbol.
 	/// </summary>
-	protected TSymbol? CurrentSymbol
+	protected HandlebarsSymbol? CurrentSymbol
 	{
 		get { return Tokenizer?.Current; }
 	}
@@ -56,12 +50,12 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// <summary>
 	/// Gets the language characteristics.
 	/// </summary>
-	protected abstract LanguageCharacteristics<TTokenizer, TSymbol, TSymbolType> Language { get; }
+	protected abstract LanguageCharacteristics<HandlebarsTokenizer, HandlebarsSymbol, HandlebarsSymbolType> Language { get; }
 
 	/// <summary>
 	/// Gets the previous symbol.
 	/// </summary>
-	protected TSymbol? PreviousSymbol { get; private set; }
+	protected HandlebarsSymbol? PreviousSymbol { get; private set; }
 
 	/// <summary>
 	/// Gets or sets the span (builder).
@@ -76,7 +70,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// <summary>
 	/// Gets the tokenizer.
 	/// </summary>
-	protected TokenizerView<TTokenizer, TSymbol, TSymbolType> Tokenizer
+	protected TokenizerView Tokenizer
 	{
 		get { return _tokenizer ?? InitTokenizer(); }
 	}
@@ -106,9 +100,9 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Initializes the tokenizer.
 	/// </summary>
 	/// <returns>The tokenizer instance.</returns>
-	private TokenizerView<TTokenizer, TSymbol, TSymbolType> InitTokenizer()
+	private TokenizerView InitTokenizer()
 	{
-		return _tokenizer = new TokenizerView<TTokenizer, TSymbol, TSymbolType>(
+		return _tokenizer = new TokenizerView(
 			Language.CreateTokenizer(Context!.Source));
 	}
 
@@ -116,9 +110,9 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Accepts the specified symbol.
 	/// </summary>
 	/// <param name="symbol">The symbol.</param>
-	protected internal void Accept(TSymbol symbol)
+	protected internal void Accept(HandlebarsSymbol symbol)
 	{
-		if (symbol != null)
+		if (symbol.HasValue)
 		{
 			foreach (var error in symbol.Errors)
 			{
@@ -132,7 +126,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Accepts the specified symbols.
 	/// </summary>
 	/// <param name="symbols">The symbols.</param>
-	protected internal void Accept(IEnumerable<TSymbol> symbols)
+	protected internal void Accept(IEnumerable<HandlebarsSymbol> symbols)
 	{
 		foreach (var sym in symbols)
 		{
@@ -145,11 +139,11 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="types">The types.</param>
 	/// <returns>True if all symbol types were accepted, otherwise false.</returns>
-	protected internal bool AcceptAll(params TSymbolType[] types)
+	protected internal bool AcceptAll(params HandlebarsSymbolType[] types)
 	{
 		foreach (var type in types)
 		{
-			if (CurrentSymbol == null || !Equals(type, CurrentSymbol.Type))
+			if (CurrentSymbol == null || !Equals(type, CurrentSymbol.Value.Type))
 			{
 				return false;
 			}
@@ -164,7 +158,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// <returns>True if we could move to the next token.</returns>
 	protected internal bool AcceptAndMoveNext()
 	{
-		Accept(CurrentSymbol!);
+		Accept(CurrentSymbol!.Value);
 		return NextToken();
 	}
 
@@ -173,7 +167,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Accepts all tokens until they match the given type.
 	/// </summary>
 	/// <param name="type">The first type.</param>
-	protected internal void AcceptUntil(TSymbolType type)
+	protected internal void AcceptUntil(HandlebarsSymbolType type)
 	{
 		AcceptWhile(sym => !Equals(type, sym.Type));
 	}
@@ -183,7 +177,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="type1">The first type.</param>
 	/// <param name="type2">The second type.</param>
-	protected internal void AcceptUntil(TSymbolType type1, TSymbolType type2)
+	protected internal void AcceptUntil(HandlebarsSymbolType type1, HandlebarsSymbolType type2)
 	{
 		AcceptWhile(sym => !Equals(type1, sym.Type) && !Equals(type2, sym.Type));
 	}
@@ -194,7 +188,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// <param name="type1">The first type.</param>
 	/// <param name="type2">The second type.</param>
 	/// <param name="type3">The third type.</param>
-	protected internal void AcceptUntil(TSymbolType type1, TSymbolType type2, TSymbolType type3)
+	protected internal void AcceptUntil(HandlebarsSymbolType type1, HandlebarsSymbolType type2, HandlebarsSymbolType type3)
 	{
 		AcceptWhile(sym => !Equals(type1, sym.Type) && !Equals(type2, sym.Type) && !Equals(type3, sym.Type));
 	}
@@ -203,7 +197,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Accepts all tokens until they match any of the given types.
 	/// </summary>
 	/// <param name="types">The types.</param>
-	protected internal void AcceptUntil(params TSymbolType[] types)
+	protected internal void AcceptUntil(params HandlebarsSymbolType[] types)
 	{
 		AcceptWhile(sym => types.All(t => !Equals(t, sym.Type)));
 	}
@@ -212,7 +206,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Accepts all tokens while they match the given type.
 	/// </summary>
 	/// <param name="type">The type.</param>
-	protected internal void AcceptWhile(TSymbolType type)
+	protected internal void AcceptWhile(HandlebarsSymbolType type)
 	{
 		AcceptWhile(sym => Equals(type, sym.Type));
 	}
@@ -222,7 +216,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="type1">The first type.</param>
 	/// <param name="type2">The second type.</param>
-	protected internal void AcceptWhile(TSymbolType type1, TSymbolType type2)
+	protected internal void AcceptWhile(HandlebarsSymbolType type1, HandlebarsSymbolType type2)
 	{
 		AcceptWhile(sym => Equals(type1, sym.Type) || Equals(type2, sym.Type));
 	}
@@ -233,7 +227,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// <param name="type1">The first type.</param>
 	/// <param name="type2">The second type.</param>
 	/// <param name="type3">The third type.</param>
-	protected internal void AcceptWhile(TSymbolType type1, TSymbolType type2, TSymbolType type3)
+	protected internal void AcceptWhile(HandlebarsSymbolType type1, HandlebarsSymbolType type2, HandlebarsSymbolType type3)
 	{
 		AcceptWhile(sym => Equals(type1, sym.Type) || Equals(type2, sym.Type) || Equals(type3, sym.Type));
 	}
@@ -242,7 +236,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Accepts all tokens while they match any of the given types.
 	/// </summary>
 	/// <param name="types">The types.</param>
-	protected internal void AcceptWhile(params TSymbolType[] types)
+	protected internal void AcceptWhile(params HandlebarsSymbolType[] types)
 	{
 		AcceptWhile(sym => types.Any(t => Equals(t, sym.Type)));
 	}
@@ -251,7 +245,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Accepts all tokens while the given condition is met.
 	/// </summary>
 	/// <param name="condition">The condition.</param>
-	protected internal void AcceptWhile(Func<TSymbol, bool> condition)
+	protected internal void AcceptWhile(Func<HandlebarsSymbol, bool> condition)
 	{
 		Accept(ReadWhileLazy(condition));
 	}
@@ -261,9 +255,9 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="type">The type.</param>
 	/// <returns>True if we are currently at a symbol of the specified type, otherwise false.</returns>
-	protected internal bool At(TSymbolType type)
+	protected internal bool At(HandlebarsSymbolType type)
 	{
-		return !EndOfFile && CurrentSymbol != null && Equals(type, CurrentSymbol.Type);
+		return !EndOfFile && CurrentSymbol != null && Equals(type, CurrentSymbol.Value.Type);
 	}
 
 	/// <summary>
@@ -322,7 +316,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Accepts all tokens of the given type (in order).
 	/// </summary>
 	/// <param name="types">The types.</param>
-	protected internal void Expected(params TSymbolType[] types)
+	protected internal void Expected(params HandlebarsSymbolType[] types)
 	{
 		AcceptAndMoveNext();
 	}
@@ -332,9 +326,9 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="type">The type.</param>
 	/// <returns>True if the next symbol matches the type, otherwise false.</returns>
-	protected internal bool NextIs(TSymbolType type)
+	protected internal bool NextIs(HandlebarsSymbolType type)
 	{
-		return NextIs(sym => sym != null && Equals(type, sym.Type));
+		return NextIs(sym => sym.HasValue && Equals(type, sym.Type));
 	}
 
 	/// <summary>
@@ -342,9 +336,9 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="types">The typse.</param>
 	/// <returns>True if the next symbol matches any of the given types, otherwise false.</returns>
-	protected internal bool NextIs(params TSymbolType[] types)
+	protected internal bool NextIs(params HandlebarsSymbolType[] types)
 	{
-		return NextIs(sym => sym != null && types.Any(t => Equals(t, sym.Type)));
+		return NextIs(sym => sym.HasValue && types.Any(t => Equals(t, sym.Type)));
 	}
 
 	/// <summary>
@@ -352,15 +346,19 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="condition">The condition.</param>
 	/// <returns>True if the next symbol matches the condition, otherwise false.</returns>
-	protected internal bool NextIs(Func<TSymbol, bool> condition)
+	protected internal bool NextIs(Func<HandlebarsSymbol, bool> condition)
 	{
 		var current = CurrentSymbol;
-		NextToken();
-		var result = condition(CurrentSymbol!);
-		PutCurrentBack();
-		PutBack(current!);
-		EnsureCurrent();
-		return result;
+		if (NextToken())
+		{
+			var result = condition(CurrentSymbol!.Value);
+			PutCurrentBack();
+			PutBack(current!.Value);
+			EnsureCurrent();
+			return result;
+		}
+
+		return false;
 	}
 
 	/// <summary>
@@ -401,7 +399,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="type">The type.</param>
 	/// <returns>True if the optional type was found, otherwise false.</returns>
-	protected internal bool Optional(TSymbolType type)
+	protected internal bool Optional(HandlebarsSymbolType type)
 	{
 		if (At(type))
 		{
@@ -449,9 +447,9 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Resets the source back to the beginning of the symbol.
 	/// </summary>
 	/// <param name="symbol">The symbol.</param>
-	protected internal void PutBack(TSymbol symbol)
+	protected internal void PutBack(HandlebarsSymbol symbol)
 	{
-		if (symbol != null)
+		if (symbol.HasValue)
 		{
 			Tokenizer.PutBack(symbol);
 		}
@@ -461,7 +459,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// Puts the set of symbols back (in reverse order).
 	/// </summary>
 	/// <param name="symbols">The symbols.</param>
-	protected internal void PutBack(IEnumerable<TSymbol> symbols)
+	protected internal void PutBack(IEnumerable<HandlebarsSymbol> symbols)
 	{
 		foreach (var symbol in symbols.Reverse())
 		{
@@ -476,7 +474,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	{
 		if (!EndOfFile && CurrentSymbol != null)
 		{
-			PutBack(CurrentSymbol);
+			PutBack(CurrentSymbol!.Value);
 		}
 	}
 
@@ -486,7 +484,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// <param name="expected">The expected.</param>
 	/// <param name="errorIfNotFound">if set to <c>true</c> [error if not found].</param>
 	/// <returns>True if the token was found, otherwise false.</returns>
-	protected internal bool Required(TSymbolType expected, bool errorIfNotFound)
+	protected internal bool Required(HandlebarsSymbolType expected, bool errorIfNotFound)
 	{
 		bool found = At(expected);
 		if (!found && errorIfNotFound)
@@ -502,7 +500,7 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="condition">The condition.</param>
 	/// <returns>The set of read tokens.</returns>
-	protected internal IEnumerable<TSymbol> ReadWhile(Func<TSymbol, bool> condition)
+	protected internal IEnumerable<HandlebarsSymbol> ReadWhile(Func<HandlebarsSymbol, bool> condition)
 	{
 		return ReadWhileLazy(condition).ToList();
 	}
@@ -512,11 +510,11 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="condition">The condition.</param>
 	/// <returns>The set of read tokens.</returns>
-	internal IEnumerable<TSymbol> ReadWhileLazy(Func<TSymbol, bool> condition)
+	internal IEnumerable<HandlebarsSymbol> ReadWhileLazy(Func<HandlebarsSymbol, bool> condition)
 	{
-		while (EnsureCurrent() && condition(CurrentSymbol!))
+		while (EnsureCurrent() && condition(CurrentSymbol!.Value))
 		{
-			yield return CurrentSymbol!;
+			yield return CurrentSymbol!.Value;
 			NextToken();
 		}
 	}
@@ -526,8 +524,8 @@ public abstract class TokenizerBackedParser<TTokenizer, TSymbol, TSymbolType> : 
 	/// </summary>
 	/// <param name="type">The type.</param>
 	/// <returns>True if the previous symbol matches the given type, otherwise false.</returns>
-	protected internal bool Was(TSymbolType type)
+	protected internal bool Was(HandlebarsSymbolType type)
 	{
-		return PreviousSymbol != null && Equals(type, PreviousSymbol.Type);
+		return PreviousSymbol != null && Equals(type, PreviousSymbol.Value.Type);
 	}
 }

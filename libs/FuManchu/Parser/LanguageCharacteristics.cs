@@ -15,7 +15,7 @@ using FuManchu.Tokenizer;
 /// </summary>
 public abstract class LanguageCharacteristics<TTokenizer, TSymbol, TSymbolType>
 	where TTokenizer : Tokenizer<TSymbol, TSymbolType>
-	where TSymbol : SymbolBase<TSymbolType>
+	where TSymbol : struct, ISymbol<TSymbolType>
 	where TSymbolType : struct
 {
 	/// <summary>
@@ -59,7 +59,7 @@ public abstract class LanguageCharacteristics<TTokenizer, TSymbol, TSymbolType>
 	/// </summary>
 	/// <param name="content">The content.</param>
 	/// <returns>The set of symbols from the source string.</returns>
-	public virtual IEnumerable<TSymbol> TokenizeString(string content)
+	public virtual IEnumerable<HandlebarsSymbol> TokenizeString(string content)
 	{
 		return TokenizeString(SourceLocation.Zero, content);
 	}
@@ -70,16 +70,16 @@ public abstract class LanguageCharacteristics<TTokenizer, TSymbol, TSymbolType>
 	/// <param name="start">The start.</param>
 	/// <param name="content">The content.</param>
 	/// <returns>The set of symbols from the source string.</returns>
-	public virtual IEnumerable<TSymbol> TokenizeString(SourceLocation start, string content)
+	public virtual IEnumerable<HandlebarsSymbol> TokenizeString(SourceLocation start, string content)
 	{
 		using (var reader = new SeekableTextReader(content))
 		{
 			var tok = CreateTokenizer(reader);
-			TSymbol? sym;
+			HandlebarsSymbol? sym;
 			while ((sym = tok.NextSymbol()) != null)
 			{
-				sym.OffsetStart(start);
-				yield return sym;
+				sym.Value.OffsetStart(start);
+				yield return sym.Value;
 			}
 		}
 	}

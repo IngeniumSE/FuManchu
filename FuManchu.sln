@@ -41,6 +41,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FuManchu", "libs\FuManchu\F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FuManchu.Tests", "tests\FuManchu.Tests\FuManchu.Tests.csproj", "{5657C855-7F41-4BBD-8F28-6158C9F4412B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{7DF84E8F-934C-4AF3-9AA1-5465BF597E57}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FuManchu.Benckmarking", "apps\FuManchu.Benckmarking\FuManchu.Benckmarking.csproj", "{EAB25E3C-BB47-4D8B-B6E6-2770BA922448}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,10 @@ Global
 		{5657C855-7F41-4BBD-8F28-6158C9F4412B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5657C855-7F41-4BBD-8F28-6158C9F4412B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5657C855-7F41-4BBD-8F28-6158C9F4412B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAB25E3C-BB47-4D8B-B6E6-2770BA922448}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAB25E3C-BB47-4D8B-B6E6-2770BA922448}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAB25E3C-BB47-4D8B-B6E6-2770BA922448}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAB25E3C-BB47-4D8B-B6E6-2770BA922448}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +82,7 @@ Global
 		{97639CDE-C698-4FD7-995F-8AE44F1BF8E0} = {158819D8-F88C-4F77-890F-D0C2E4D56C08}
 		{83D92240-965A-4E84-8686-48EAAA153FE6} = {E48489AB-B880-4C98-92D3-4E171FB1735C}
 		{5657C855-7F41-4BBD-8F28-6158C9F4412B} = {37ABC77B-D881-471D-AF7A-1A5E8118D534}
+		{EAB25E3C-BB47-4D8B-B6E6-2770BA922448} = {7DF84E8F-934C-4AF3-9AA1-5465BF597E57}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EFA92856-B041-4D18-B733-EC53980E9492}

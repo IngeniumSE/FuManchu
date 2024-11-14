@@ -110,7 +110,7 @@ public class RenderContext
 	/// <returns>The resolved value.</returns>
 	public object? ResolveValue(Span span)
 	{
-		IEnumerable<ISymbol>? symbols;
+		IEnumerable<HandlebarsSymbol>? symbols;
 
 		switch (span.Kind)
 		{
@@ -139,7 +139,7 @@ public class RenderContext
 	/// </summary>
 	/// <param name="symbols">The set of symbols.</param>
 	/// <returns>The resolved value.</returns>
-	private object? ResolveValueFromSymbols(ISymbol[] symbols)
+	private object? ResolveValueFromSymbols(HandlebarsSymbol[] symbols)
 	{
 		if (symbols.Length == 0)
 		{
@@ -152,7 +152,7 @@ public class RenderContext
 		string expression = string.Empty;
 		bool isVariableLookup = false;
 
-		foreach (HandlebarsSymbol symbol in symbols)
+		foreach (var symbol in symbols)
 		{
 			switch (symbol.Type)
 			{

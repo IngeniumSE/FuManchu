@@ -134,8 +134,8 @@ public class WhiteSpaceCollapsingParserVisitor : ParserVisitor
 	{
 		if (span.Kind == SpanKind.MetaCode)
 		{
-			var symbol = span.Symbols.FirstOrDefault() as HandlebarsSymbol;
-			if (symbol != null && symbol.Type == HandlebarsSymbolType.Tilde)
+			var symbol = span.Symbols.FirstOrDefault();
+			if (symbol.HasValue && symbol.Type == HandlebarsSymbolType.Tilde)
 			{
 				VisitTilde(span);
 			}

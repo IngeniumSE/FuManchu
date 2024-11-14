@@ -1,0 +1,40 @@
+{{#>Layout}}
+  {{>content}}
+  
+    {{>TitleBlock title="Order Confirmation" subtitle="Thank you for your order. Your order details are below."}}
+
+    {{#>Section class="text-left"}}
+      {{>content}}
+
+      <h2>Order #{{OrderId}}</h2>
+
+      {{#if OrderContainsBooking}}
+        {{#if OrderContainsDirectBooking}}
+          <h3>Booking Confirmed</h3>
+          <p>Thank you for your booking which has been confirmed with the venue. Your official booking confirmation which details your itinerary will follow shortly.</p>
+        {{^}}
+          <h3>Booking Pending</h3>
+          <p>Thank you for your booking which is currently pending. We are now confirming your itinerary with the venue and your official booking confirmation will follow shortly.</p>
+        {{/if}}
+      {{^}}
+        <p>Thank you for your order.</p>
+      {{/if}}
+
+      <hr />
+
+      <p><strong>Personal details</strong></p>
+      {{#if Customer.Email}}
+        <p><strong>Email address:</strong> {{Customer.Email}}</p>
+      {{/if}}
+
+      {{>Addresses billing=BillingAddress shipping=ShippingAddress}}
+
+      {{#if Agent}}
+        <p><strong>Booked with:</strong> {{Agent.Forename}}</p>
+      {{/if}}
+
+      {{/content}}
+    {{/Section}}
+
+  {{/content}}
+{{/Layout}}

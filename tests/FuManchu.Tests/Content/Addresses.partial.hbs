@@ -1,0 +1,21 @@
+{{#>Row}}
+  {{>content}}
+
+    {{#if billing}}
+      {{#>Column}}
+        {{>content}}
+          {{>Address title="Billing Address" address=billing}}
+        {{/content}}
+      {{/Column}}
+    {{/if}}
+
+    {{#if shipping}}
+      {{#>Column}}
+        {{>content}}
+          {{>Address title="Shipping Address" address=shipping}}
+        {{/content}}
+      {{/Column}}
+    {{/if}}
+
+  {{/content}}
+{{/Row}}

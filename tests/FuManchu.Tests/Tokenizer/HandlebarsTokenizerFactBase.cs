@@ -9,7 +9,7 @@ using FuManchu.Tokenizer;
 /// <summary>
 /// Provides a base implementation of a Fact set for testing the <see cref="HandlebarsTokenizer"/>
 /// </summary>
-public abstract class HandlebarsTokenizerFactBase : TokenizerFactBase<HandlebarsTokenizer, HandlebarsSymbol, HandlebarsSymbolType>
+public abstract class HandlebarsTokenizerFactBase : TokenizerFactBase
 {
 	private static readonly HandlebarsSymbol _ignoreRemaining = new HandlebarsSymbol(0, 0, 0, string.Empty, HandlebarsSymbolType.Unknown);
 

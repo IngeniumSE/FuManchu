@@ -247,7 +247,7 @@ public class HandlebarsParserFacts
 						),
 					factory.WhiteSpace(1),
 					factory.Map("class",
-						() => new ISymbol[]
+						() => new HandlebarsSymbol[]
 									{
 										factory.Symbol("model", T.Identifier),
 										factory.Symbol(".", T.Dot),
@@ -255,7 +255,7 @@ public class HandlebarsParserFacts
 									}),
 					factory.WhiteSpace(1),
 					factory.Map("age",
-						() => new ISymbol[]
+						() => new HandlebarsSymbol[]
 									{
 										factory.Symbol(".", T.Dot),
 										factory.Symbol("/", T.Slash),

@@ -15,7 +15,7 @@ public class LineTrackingStringBufferFacts
 	[Fact]
 	public void ConstructorInitialisesProperties()
 	{
-		var buffer = new LineTrackingStringBuffer();
+		using var buffer = new LineTrackingStringBuffer();
 
 		Assert.Equal(0, buffer.Length);
 	}
@@ -23,7 +23,7 @@ public class LineTrackingStringBufferFacts
 	[Fact]
 	public void CharAtCorrectlyReturnsLocation()
 	{
-		var buffer = new LineTrackingStringBuffer();
+		using var buffer = new LineTrackingStringBuffer();
 		buffer.Append("foo\rbar\nbaz\r\nbiz");
 
 		var chr = buffer.CharAt(14);
