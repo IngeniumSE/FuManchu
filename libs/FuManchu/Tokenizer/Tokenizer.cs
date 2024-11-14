@@ -18,8 +18,8 @@ using FuManchu.Text;
 /// </summary>
 /// <typeparam name="TSymbol">The type of the symbol.</typeparam>
 /// <typeparam name="TSymbolType">The type of the symbol type.</typeparam>
-public abstract class Tokenizer<TSymbol, TSymbolType> : StateMachine<TSymbol>, ITokenizer
-	where TSymbol : SymbolBase<TSymbolType>
+public abstract class Tokenizer<TSymbol, TSymbolType> : StateMachine, ITokenizer, IDisposable
+	where TSymbol : struct, ISymbol<TSymbolType>
 	where TSymbolType : struct
 {
 	/// <summary>
@@ -34,7 +34,7 @@ public abstract class Tokenizer<TSymbol, TSymbolType> : StateMachine<TSymbol>, I
 		}
 
 		Source = new TextDocumentReader(source);
-		Buffer = new StringBuilder();
+		Buffer = StringBuilderPool.Rent();
 		CurrentErrors = new List<Error>();
 
 		StartSymbol();
@@ -153,37 +153,66 @@ public abstract class Tokenizer<TSymbol, TSymbolType> : StateMachine<TSymbol>, I
 	/// <returns>If the expected string was matched, otherwise false.</returns>
 	private bool Lookahead(string expected, bool takeIfMatch, bool caseSensitive)
 	{
-		Func<char, char> charFilter = c => c;
-		if (!caseSensitive)
-		{
-			charFilter = Char.ToLowerInvariant;
-		}
-
-		if (expected.Length == 0 || charFilter(CurrentCharacter) != charFilter(expected[0]))
+		if (expected.Length == 0)
 		{
 			return false;
 		}
 
-		string? oldBuffer = null;
+		if (caseSensitive && CurrentCharacter != expected[0])
+		{
+			return false;
+		}
+
+		if (!caseSensitive)
+		{
+			var (loweredCurrent, loweredExpected) = (Char.ToLowerInvariant(CurrentCharacter), Char.ToLowerInvariant(expected[0]));
+
+			if (loweredCurrent != loweredExpected)
+			{
+				return false;
+			}
+		}
+
+		StringBuilder? oldBuffer = null;
 		if (takeIfMatch)
 		{
-			oldBuffer = Buffer.ToString();
+			oldBuffer = Buffer;
 		}
 
 		using (var lookahead = Source.BeginLookahead())
 		{
 			for (int i = 0; i < expected.Length; i++)
 			{
-				if (charFilter(CurrentCharacter) != charFilter(expected[i]))
+				if (caseSensitive && CurrentCharacter != expected[i])
 				{
 					if (takeIfMatch)
 					{
-						Buffer.Clear();
+						Buffer = StringBuilderPool.Rent();
 						Buffer.Append(oldBuffer);
+
+						StringBuilderPool.Release(oldBuffer!);
 					}
 
 					return false;
 				}
+				else if (!caseSensitive)
+				{
+					var (loweredCurrent, loweredExpected) = (Char.ToLowerInvariant(CurrentCharacter), Char.ToLowerInvariant(expected[0]));
+
+					if (loweredCurrent != loweredExpected)
+					{
+						if (takeIfMatch)
+						{
+							Buffer = StringBuilderPool.Rent();
+							Buffer.Append(oldBuffer);
+
+							StringBuilderPool.Release(oldBuffer!);
+						}
+
+						return false;
+					}
+				}
+
 				if (takeIfMatch)
 				{
 					TakeCurrent();
@@ -214,7 +243,7 @@ public abstract class Tokenizer<TSymbol, TSymbolType> : StateMachine<TSymbol>, I
 	/// Reads the next symbol
 	/// </summary>
 	/// <returns>The next symbol.</returns>
-	public virtual TSymbol? NextSymbol()
+	public virtual HandlebarsSymbol? NextSymbol()
 	{
 		StartSymbol();
 
@@ -268,11 +297,14 @@ public abstract class Tokenizer<TSymbol, TSymbolType> : StateMachine<TSymbol>, I
 		}
 
 		CurrentStart = previous.Start;
-		string newContent = Buffer.ToString();
 
-		Buffer.Clear();
-		Buffer.Append(previous.Content);
-		Buffer.Append(newContent);
+		var buffer = Buffer;
+		Buffer = StringBuilderPool.Rent();
+
+		Buffer.Append(previous.Content.AsSpan());
+		Buffer.Append(buffer);
+
+		StringBuilderPool.Release(buffer);
 	}
 
 	/// <summary>
@@ -355,5 +387,13 @@ public abstract class Tokenizer<TSymbol, TSymbolType> : StateMachine<TSymbol>, I
 		}
 
 		return !EndOfFile;
+	}
+
+	public void Dispose()
+	{
+		if (Buffer is not null)
+		{
+			StringBuilderPool.Release(Buffer);
+		}
 	}
 }

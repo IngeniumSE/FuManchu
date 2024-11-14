@@ -16,9 +16,19 @@ public interface ISymbol
 	string Content { get; }
 
 	/// <summary>
+	/// Gets whether the symbol has value.
+	/// </summary>
+	bool HasValue { get; }
+
+	/// <summary>
 	/// Gets the start of the symbol.
 	/// </summary>
 	SourceLocation Start { get; }
+
+	/// <summary>
+	/// Gets the errors for the symbol.
+	/// </summary>
+	IEnumerable<Error> Errors { get; }
 
 	/// <summary>
 	/// Changes the start of the symbol.
@@ -31,4 +41,12 @@ public interface ISymbol
 	/// </summary>
 	/// <param name="documentStart">The document start.</param>
 	void OffsetStart(SourceLocation documentStart);
+}
+
+public interface ISymbol<T> : ISymbol where T : struct
+{
+	/// <summary>
+	/// Gets the symbol type.
+	/// </summary>
+	T Type { get; }
 }

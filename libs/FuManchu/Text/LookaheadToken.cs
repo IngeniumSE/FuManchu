@@ -10,16 +10,17 @@ using System;
 /// </summary>
 public class LookaheadToken : IDisposable
 {
-	private readonly Action _action;
+	readonly ITextBuffer _buffer;
+	readonly int _start;
 	private bool _accepted;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="LookaheadToken"/> class.
 	/// </summary>
-	/// <param name="action">The action.</param>
-	public LookaheadToken(Action action)
+	public LookaheadToken(ITextBuffer buffer, int start)
 	{
-		_action = action;
+		_buffer = buffer;
+		_start = start;
 	}
 
 	/// <summary>
@@ -45,7 +46,7 @@ public class LookaheadToken : IDisposable
 	{
 		if (!_accepted)
 		{
-			_action();
+			_buffer.Position = _start;
 		}
 	}
 }

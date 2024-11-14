@@ -14,7 +14,7 @@ using FuManchu.Tokenizer;
 /// </summary>
 public class SpanBuilder
 {
-	private IList<ISymbol> _symbols = new List<ISymbol>();
+	private IList<HandlebarsSymbol> _symbols = new List<HandlebarsSymbol>();
 	private SourceLocationTracker _tracker = new SourceLocationTracker();
 
 	/// <summary>
@@ -33,7 +33,7 @@ public class SpanBuilder
 	{
 		Collapsed = original.Collapsed;
 		Kind = original.Kind;
-		_symbols = new List<ISymbol>(original.Symbols);
+		_symbols = new List<HandlebarsSymbol>(original.Symbols);
 		Start = original.Start;
 	}
 
@@ -55,13 +55,13 @@ public class SpanBuilder
 	/// <summary>
 	/// Gets the symbols.
 	/// </summary>
-	public ReadOnlyCollection<ISymbol> Symbols { get { return new ReadOnlyCollection<ISymbol>(_symbols); } }
+	public ReadOnlyCollection<HandlebarsSymbol> Symbols { get { return new ReadOnlyCollection<HandlebarsSymbol>(_symbols); } }
 
 	/// <summary>
 	/// Accepts the specified symbol.
 	/// </summary>
 	/// <param name="symbol">The symbol.</param>
-	public void Accept(ISymbol symbol)
+	public void Accept(HandlebarsSymbol? symbol)
 	{
 		if (symbol == null)
 		{
@@ -70,17 +70,17 @@ public class SpanBuilder
 
 		if (_symbols.Count == 0)
 		{
-			Start = symbol.Start;
-			symbol.ChangeStart(SourceLocation.Zero);
+			Start = symbol.Value.Start;
+			symbol.Value.ChangeStart(SourceLocation.Zero);
 			_tracker.CurrentLocation = SourceLocation.Zero;
 		}
 		else
 		{
-			symbol.ChangeStart(_tracker.CurrentLocation);
+			symbol.Value.ChangeStart(_tracker.CurrentLocation);
 		}
 
-		_symbols.Add(symbol);
-		_tracker.UpdateLocation(symbol.Content);
+		_symbols.Add(symbol.Value);
+		_tracker.UpdateLocation(symbol.Value.Content);
 	}
 
 	/// <summary>
@@ -105,7 +105,7 @@ public class SpanBuilder
 	/// </summary>
 	public void Reset()
 	{
-		_symbols = new List<ISymbol>();
+		_symbols = new List<HandlebarsSymbol>();
 		Start = SourceLocation.Zero;
 	}
 }

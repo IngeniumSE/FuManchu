@@ -18,7 +18,7 @@ internal static class TextExtensions
 	public static LookaheadToken BeginLookahead(this ITextBuffer self)
 	{
 		var start = self.Position;
-		return new LookaheadToken(() => self.Position = start);
+		return new LookaheadToken(self, start);
 	}
 
 	/// <summary>

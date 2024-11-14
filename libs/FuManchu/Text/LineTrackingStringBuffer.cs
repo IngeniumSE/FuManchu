@@ -5,13 +5,14 @@ namespace FuManchu.Text;
 
 using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 using FuManchu.Parser;
 
 /// <summary>
 /// Represents a string buffer with line tracking.
 /// </summary>
-public class LineTrackingStringBuffer
+public class LineTrackingStringBuffer : IDisposable
 {
 	private TextLine? _currentLine;
 	private TextLine _endLine;
@@ -143,6 +144,14 @@ public class LineTrackingStringBuffer
 		}
 
 		return null;
+	}
+
+	public void Dispose()
+	{
+		foreach (var line in _lines)
+		{
+			line.Dispose();
+		}
 	}
 
 	/// <summary>

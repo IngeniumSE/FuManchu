@@ -1,0 +1,13 @@
+<div style="font-size: 14px; line-height: 160%; word-wrap: break-word;">
+  <strong>{{title}}</strong>
+  <div>
+    {{#with address}}
+    {{Forename}} {{Surname}},<br />
+    {{Line1}},<br />
+    {{#if Line2}}{{Line2}},<br />{{/if}}
+    {{City}},<br />
+    {{County}},<br />
+    {{Postcode}}{{#if Country}},<br />{{Country}}{{/if}}
+    {{/with}}
+  </div>
+</div>

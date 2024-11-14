@@ -13,7 +13,7 @@ using FuManchu.Tokenizer;
 /// <summary>
 /// Provides parsing services for the Handlebars language.
 /// </summary>
-public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, HandlebarsSymbol, HandlebarsSymbolType>
+public class HandlebarsParser : TokenizerBackedParser
 {
 	/// <inheritdoc />
 	protected override LanguageCharacteristics<HandlebarsTokenizer, HandlebarsSymbol, HandlebarsSymbolType> Language
@@ -75,9 +75,9 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			Context.CurrentBlock.Name = tagName;
 			Context.CurrentBlock.Descriptor = descriptor;
 
-			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
+			while (CurrentSymbol!.Value.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.Tilde)
 			{
-				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.WhiteSpace)
 				{
 					// Accept all the whitespace.
 					AcceptAll(HandlebarsSymbolType.WhiteSpace);
@@ -85,7 +85,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 					Output(SpanKind.WhiteSpace);
 				}
 
-				if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Assign)
 				{
 					// We're in a parameterised argument (e.g. one=two
 					AcceptAndMoveNext();
@@ -98,7 +98,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 				{
 					// Accept everything until the next whitespace or closing tag.
 					AcceptUntil(HandlebarsSymbolType.Assign, HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
-					if (CurrentSymbol.Type != HandlebarsSymbolType.Assign)
+					if (CurrentSymbol.Value.Type != HandlebarsSymbolType.Assign)
 					{
 						// Output this as a parameter.
 						Output(SpanKind.Parameter);
@@ -278,9 +278,9 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 				Context.CurrentBlock.Type = BlockType.TagElement;
 			}
 
-			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
+			while (CurrentSymbol!.Value.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.Tilde)
 			{
-				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.WhiteSpace)
 				{
 					// Accept all the whitespace.
 					AcceptAll(HandlebarsSymbolType.WhiteSpace);
@@ -288,7 +288,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 					Output(SpanKind.WhiteSpace);
 				}
 
-				if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Assign)
 				{
 					// We're in a parameterised argument (e.g. one=two
 					AcceptAndMoveNext();
@@ -301,7 +301,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 				{
 					// Accept everything until the next whitespace or closing tag.
 					AcceptUntil(HandlebarsSymbolType.Assign, HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
-					if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+					if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Assign)
 					{
 						continue;
 					}
@@ -356,9 +356,9 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			tagName = LastSpanContent();
 			Context.CurrentBlock.Name = tagName;
 
-			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
+			while (CurrentSymbol!.Value.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.Tilde)
 			{
-				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.WhiteSpace)
 				{
 					// Accept all the whitespace.
 					AcceptAll(HandlebarsSymbolType.WhiteSpace);
@@ -366,7 +366,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 					Output(SpanKind.WhiteSpace);
 				}
 
-				if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Assign)
 				{
 					// We're in a parameterised argument (e.g. one=two
 					AcceptAndMoveNext();
@@ -379,7 +379,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 				{
 					// Accept everything until the next whitespace or closing tag.
 					AcceptUntil(HandlebarsSymbolType.Assign, HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
-					if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+					if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Assign)
 					{
 						continue;
 					}
@@ -458,9 +458,9 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			Context.CurrentBlock.Name = tagName;
 			Context.CurrentBlock.Descriptor = descriptor;
 
-			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
+			while (CurrentSymbol!.Value.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.Tilde)
 			{
-				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.WhiteSpace)
 				{
 					// Accept all the whitespace.
 					AcceptAll(HandlebarsSymbolType.WhiteSpace);
@@ -468,7 +468,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 					Output(SpanKind.WhiteSpace);
 				}
 
-				if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Assign)
 				{
 					// We're in a parameterised argument (e.g. one=two
 					AcceptAndMoveNext();
@@ -481,7 +481,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 				{
 					// Accept everything until the next whitespace or closing tag.
 					AcceptUntil(HandlebarsSymbolType.Assign, HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
-					if (CurrentSymbol.Type != HandlebarsSymbolType.Assign)
+					if (CurrentSymbol.Value.Type != HandlebarsSymbolType.Assign)
 					{
 						// Output this as a parameter.
 						Output(SpanKind.Parameter);
@@ -557,9 +557,9 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			Context.CurrentBlock.Name = tagName;
 			Context.CurrentBlock.Descriptor = descriptor;
 
-			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
+			while (CurrentSymbol!.Value.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.Tilde)
 			{
-				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.WhiteSpace)
 				{
 					// Accept all the whitespace.
 					AcceptAll(HandlebarsSymbolType.WhiteSpace);
@@ -567,7 +567,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 					Output(SpanKind.WhiteSpace);
 				}
 
-				if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Assign)
 				{
 					// We're in a parameterised argument (e.g. one=two
 					AcceptAndMoveNext();
@@ -580,7 +580,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 				{
 					// Accept everything until the next whitespace or closing tag.
 					AcceptUntil(HandlebarsSymbolType.Assign, HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
-					if (CurrentSymbol.Type != HandlebarsSymbolType.Assign)
+					if (CurrentSymbol.Value.Type != HandlebarsSymbolType.Assign)
 					{
 						// Output this as a parameter.
 						Output(SpanKind.Parameter);
@@ -641,9 +641,9 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			tagName = LastSpanContent();
 			Context.CurrentBlock.Name = tagName;
 
-			while (CurrentSymbol!.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Type != HandlebarsSymbolType.Tilde)
+			while (CurrentSymbol!.Value.Type != HandlebarsSymbolType.CloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.RawCloseTag && CurrentSymbol.Value.Type != HandlebarsSymbolType.Tilde)
 			{
-				if (CurrentSymbol.Type == HandlebarsSymbolType.WhiteSpace)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.WhiteSpace)
 				{
 					// Accept all the whitespace.
 					AcceptAll(HandlebarsSymbolType.WhiteSpace);
@@ -651,7 +651,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 					Output(SpanKind.WhiteSpace);
 				}
 
-				if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+				if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Assign)
 				{
 					// We're in a parameterised argument (e.g. one=two
 					AcceptAndMoveNext();
@@ -664,7 +664,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 				{
 					// Accept everything until the next whitespace or closing tag.
 					AcceptUntil(HandlebarsSymbolType.Assign, HandlebarsSymbolType.WhiteSpace, HandlebarsSymbolType.CloseTag, HandlebarsSymbolType.RawCloseTag, HandlebarsSymbolType.Tilde);
-					if (CurrentSymbol.Type == HandlebarsSymbolType.Assign)
+					if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Assign)
 					{
 						continue;
 					}
@@ -695,32 +695,32 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 		NextToken();
 		HandlebarsSymbol? tilde = null;
 
-		if (CurrentSymbol!.Type == HandlebarsSymbolType.Tilde)
+		if (CurrentSymbol!.Value.Type == HandlebarsSymbolType.Tilde)
 		{
 			tilde = CurrentSymbol;
 			NextToken();
 		}
 
-		if (CurrentSymbol.Type == HandlebarsSymbolType.Hash)
+		if (CurrentSymbol!.Value.Type == HandlebarsSymbolType.Hash)
 		{
 			var hash = CurrentSymbol;
 			bool isPartialBlock = false;
 
 			NextToken();
-			if (CurrentSymbol.Type == HandlebarsSymbolType.RightArrow)
+			if (CurrentSymbol.Value.Type == HandlebarsSymbolType.RightArrow)
 			{
 				isPartialBlock = true;
 			}
-			PutBack(CurrentSymbol); // Put back the > character
+			PutBack(CurrentSymbol.Value); // Put back the > character
 
 			// Put the opening tag back.
-			PutBack(hash); // Put back the # character
+			PutBack(hash!.Value); // Put back the # character
 			if (tilde != null)
 			{
-				PutBack(tilde);
+				PutBack(tilde!.Value);
 			}
 
-			PutBack(current!); // Put back the opening tag symbol
+			PutBack(current!.Value); // Put back the opening tag symbol
 			NextToken();
 
 			if (isPartialBlock)
@@ -734,41 +734,41 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 				AtBlockTag();
 			}
 		}
-		else if (CurrentSymbol.Type == HandlebarsSymbolType.Bang)
+		else if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Bang)
 		{
 			// Put the opening tag back.
-			PutBack(CurrentSymbol);
+			PutBack(CurrentSymbol!.Value);
 			if (tilde != null)
 			{
-				PutBack(tilde);
+				PutBack(tilde!.Value);
 			}
-			PutBack(current!);
+			PutBack(current!.Value);
 			NextToken();
 			// We're at a comment {{!....}}
 			AtCommentTag();
 		}
-		else if (CurrentSymbol.Type == HandlebarsSymbolType.Slash)
+		else if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Slash)
 		{
 			// Put the opening tag back.
-			PutBack(CurrentSymbol);
+			PutBack(CurrentSymbol!.Value);
 			if (tilde != null)
 			{
-				PutBack(tilde);
+				PutBack(tilde!.Value);
 			}
-			PutBack(current!);
+			PutBack(current!.Value);
 			NextToken();
 			// We're at a closing block tag {{/each}}
 			AtBlockEndTag();
 		}
-		else if (CurrentSymbol.Type == HandlebarsSymbolType.RightArrow)
+		else if (CurrentSymbol.Value.Type == HandlebarsSymbolType.RightArrow)
 		{
 			// Put the opening tag back.
-			PutBack(CurrentSymbol);
+			PutBack(CurrentSymbol!.Value);
 			if (tilde != null)
 			{
-				PutBack(tilde);
+				PutBack(tilde!.Value);
 			}
-			PutBack(current!);
+			PutBack(current!.Value);
 			NextToken();
 			if (Context!.CurrentBlock.IsPartialBlock && !Context.CurrentBlock.IsPartialBlockContent)
 			{
@@ -781,65 +781,65 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 				AtPartialTag();
 			}
 		}
-		else if (CurrentSymbol.Type == HandlebarsSymbolType.LeftArrow)
+		else if (CurrentSymbol.Value.Type == HandlebarsSymbolType.LeftArrow)
 		{
 			// Put the opening tag back.
-			PutBack(CurrentSymbol);
+			PutBack(CurrentSymbol!.Value);
 			if (tilde != null)
 			{
-				PutBack(tilde);
+				PutBack(tilde!.Value);
 			}
-			PutBack(current!);
+			PutBack(current!.Value);
 			NextToken();
 			// We're at a zone include tag {{<body}}
 			AtZoneTag();
 		}
-		else if (CurrentSymbol.Type == HandlebarsSymbolType.Negate)
+		else if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Negate)
 		{
 			var current2 = CurrentSymbol;
 			// Step foward and see if this is a block or expression.
 			NextToken();
-			if (CurrentSymbol.Type == HandlebarsSymbolType.CloseTag)
+			if (CurrentSymbol.Value.Type == HandlebarsSymbolType.CloseTag)
 			{
 				// This is an expression.	
-				PutBack(CurrentSymbol);
+				PutBack(CurrentSymbol!.Value);
 
 				// Put the opening tag back.
-				PutBack(current2);
+				PutBack(current2!.Value);
 				if (tilde != null)
 				{
-					PutBack(tilde);
+					PutBack(tilde!.Value);
 				}
-				PutBack(current!);
+				PutBack(current!.Value);
 				NextToken();
 				// We're at a negated block tag {{^hello}} etc.
 				AtExpressionTag(HandlebarsSymbolType.Negate, SpanKind.Expression);
 			}
 			else
 			{
-				PutBack(CurrentSymbol);
+				PutBack(CurrentSymbol!.Value);
 
 				// Put the opening tag back.
-				PutBack(current2);
+				PutBack(current2!.Value);
 				if (tilde != null)
 				{
-					PutBack(tilde);
+					PutBack(tilde!.Value);
 				}
-				PutBack(current!);
+				PutBack(current!.Value);
 				NextToken();
 				// We're at a negated block tag {{^hello}} etc.
 				AtBlockTag(HandlebarsSymbolType.Negate);
 			}
 		}
-		else if (CurrentSymbol.Type == HandlebarsSymbolType.Ampersand)
+		else if (CurrentSymbol.Value.Type == HandlebarsSymbolType.Ampersand)
 		{
 			// Put the opening tag back.
-			PutBack(CurrentSymbol);
+			PutBack(CurrentSymbol!.Value);
 			if (tilde != null)
 			{
-				PutBack(tilde);
+				PutBack(tilde!.Value);
 			}
-			PutBack(current!);
+			PutBack(current!.Value);
 			NextToken();
 			// Handle an expression tag.
 			AtExpressionTag(HandlebarsSymbolType.Ampersand);
@@ -847,12 +847,12 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 		else
 		{
 			// Put the opening tag back.
-			PutBack(CurrentSymbol);
+			PutBack(CurrentSymbol!.Value);
 			if (tilde != null)
 			{
-				PutBack(tilde);
+				PutBack(tilde!.Value);
 			}
-			PutBack(current!);
+			PutBack(current!.Value);
 			NextToken();
 			// Handle an expression tag.
 			AtExpressionTag();
@@ -892,7 +892,7 @@ public class HandlebarsParser : TokenizerBackedParser<HandlebarsTokenizer, Handl
 			return;
 		}
 
-		if (CurrentSymbol.Type == HandlebarsSymbolType.OpenTag || CurrentSymbol.Type == HandlebarsSymbolType.RawOpenTag)
+		if (CurrentSymbol.Value.Type == HandlebarsSymbolType.OpenTag || CurrentSymbol.Value.Type == HandlebarsSymbolType.RawOpenTag)
 		{
 			// Now we're at a tag.
 			AtTag();

@@ -70,7 +70,7 @@ public class Span : SyntaxTreeNode
 	/// <summary>
 	/// Gets the set of symbols.
 	/// </summary>
-	public IEnumerable<ISymbol>? Symbols { get; private set; }
+	public IEnumerable<HandlebarsSymbol>? Symbols { get; private set; }
 
 	/// <inheritdoc />
 	public override void Accept(IParserVisitor visitor)

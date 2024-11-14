@@ -89,7 +89,7 @@ public class Factory
 		return Block(BlockType.PartialBlockContentElement, name, true, children);
 	}
 
-	public Span Span(SpanKind kind, params ISymbol[] symbols)
+	public Span Span(SpanKind kind, params HandlebarsSymbol[] symbols)
 	{
 		var builder = new SpanBuilder();
 		builder.Kind = kind;
@@ -129,7 +129,7 @@ public class Factory
 		return Span(SpanKind.Parameter, Symbol(content, HandlebarsSymbolType.Identifier));
 	}
 
-	public Span Parameter(params ISymbol[] symbols)
+	public Span Parameter(params HandlebarsSymbol[] symbols)
 	{
 		return Span(SpanKind.Parameter, symbols);
 	}
@@ -142,10 +142,10 @@ public class Factory
 			Symbol(value, valueType));
 	}
 
-	public Span Map(string identifier, Func<ISymbol[]> valueSymbols)
+	public Span Map(string identifier, Func<HandlebarsSymbol[]> valueSymbols)
 	{
 		return Span(SpanKind.Map,
-			new ISymbol[]
+			new HandlebarsSymbol[]
 			{
 				Symbol(identifier, HandlebarsSymbolType.Identifier),
 				Symbol("=", HandlebarsSymbolType.Assign)
@@ -157,12 +157,12 @@ public class Factory
 		return Span(SpanKind.MetaCode, Symbol(content, type));
 	}
 
-	public Span Expression(params ISymbol[] symbols)
+	public Span Expression(params HandlebarsSymbol[] symbols)
 	{
 		return Span(SpanKind.Expression, symbols);
 	}
 
-	public ISymbol Symbol(string content, HandlebarsSymbolType type)
+	public HandlebarsSymbol Symbol(string content, HandlebarsSymbolType type)
 	{
 		var location = _tracker.CurrentLocation;
 		_tracker.UpdateLocation(content);
