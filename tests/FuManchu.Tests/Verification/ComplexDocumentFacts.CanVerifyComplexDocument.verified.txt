@@ -262,25 +262,19 @@
       
 
     
-      <td style="overflow-wrap:break-word;word-break:break-word;padding:30px 15px;font-family:'Quicksand',sans-serif;" align="left" width="50%">
+      <td style="overflow-wrap:break-word;word-break:break-word;padding:30px 15px;font-family:'Quicksand',sans-serif;" align="left" width="25%">
   <div style="font-size: 14px; line-height: 160%; word-wrap: break-word;">
     
           <div style="font-size: 14px; line-height: 160%; word-wrap: break-word;">
   <strong>Billing Address</strong>
   <div>
     
-    Matthew Abbott,<br />
-    1 Somestreet Lane,<br />
-    
-    Somewhere,<br />
-    Co. Somewhere,<br />
-    AA11 1AA,<br />United Kingdom
-    
   </div>
 </div>
         
   </div>
 </td>
+
     
 
     
@@ -289,6 +283,7 @@
     </tr>
   </tbody>
 </table>
+
 
       
         <p><strong>Booked with:</strong> Jo</p>

@@ -2,7 +2,7 @@
   {{>content}}
 
     {{#if billing}}
-      {{#>Column}}
+      {{#>Column width="25%"}}
         {{>content}}
           {{>Address title="Billing Address" address=billing}}
         {{/content}}
@@ -10,7 +10,7 @@
     {{/if}}
 
     {{#if shipping}}
-      {{#>Column}}
+      {{#>Column width="75%"}}
         {{>content}}
           {{>Address title="Shipping Address" address=shipping}}
         {{/content}}

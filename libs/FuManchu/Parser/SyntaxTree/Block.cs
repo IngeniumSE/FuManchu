@@ -23,7 +23,7 @@ public class Block : SyntaxTreeNode
 	public Block(BlockBuilder source)
 		: this(
 				source.Type, source.Name, source.Children, source.Descriptor,
-				source.IsPartialBlock, source.IsPartialBlockContent)
+				source.IsPartialBlock, source.IsImplicitPartialBlockContent)
 	{
 		source.Reset();
 	}

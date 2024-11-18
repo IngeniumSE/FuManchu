@@ -44,7 +44,7 @@ public class ZoneBlockRenderer : BlockRenderer
 
 		if (context.ParentRenderContext is not null)
 		{
-			return TryGetZone(name, context);
+			return TryGetZone(name, context.ParentRenderContext);
 		}
 
 		return (null, null);
