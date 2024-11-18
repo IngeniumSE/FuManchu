@@ -21,7 +21,7 @@ public abstract class BlockRenderer : SyntaxTreeNodeRenderer<Block>, IBlockRende
 	{
 		Block parametersBlock = target;
 
-		if (target.Type == BlockType.Tag)
+		if (target.Type == BlockType.Tag || target.Type == BlockType.PartialBlock || target.Type == BlockType.PartialBlockContent)
 		{
 			// The arguments will be provided by the TagElement instance.
 			parametersBlock = (Block)target.Children.First();

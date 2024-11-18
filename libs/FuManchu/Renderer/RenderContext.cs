@@ -1,4 +1,5 @@
-﻿// This work is licensed under the terms of the MIT license.
+﻿
+// This work is licensed under the terms of the MIT license.
 // For a copy, see <https://opensource.org/licenses/MIT>.
 
 namespace FuManchu.Renderer;
@@ -16,7 +17,8 @@ using FuManchu.Tokenizer;
 /// </summary>
 public class RenderContext
 {
-	private readonly Map _variables = new Map();
+	readonly Map _variables = new Map();
+	Map _parameters = new Map();
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RenderContext"/> class.
@@ -93,6 +95,23 @@ public class RenderContext
 	/// <param name="default">[Optional] The default value for the variable.</param>
 	/// <returns>The variable value.</returns>
 	public object? GetVariable(string name, object? @default = null)
+	{
+		object? value;
+		if (_variables.TryGetValue(name, out value))
+		{
+			return value;
+		}
+
+		return @default;
+	}
+
+	/// <summary>
+	/// Gets the parameter with the given name.
+	/// </summary>
+	/// <param name="name">The parameter name.</param>
+	/// <param name="default">[Optional] The default value for the parameter.</param>
+	/// <returns>The parameter value.</returns>
+	public object? GetParameter(string name, object? @default)
 	{
 		object? value;
 		if (_variables.TryGetValue(name, out value))
@@ -274,6 +293,11 @@ public class RenderContext
 			expression = expression.Substring(5);
 		}
 
+		if (_parameters.TryGetValue(expression, out var parameterValue))
+		{
+			return parameterValue;
+		}
+
 		var modelMetadata = ExpressionMetadataProvider.FromStringExpression(expression, templateData, context.ModelMetadataProvider);
 		if (modelMetadata == null || !modelMetadata.Valid)
 		{
@@ -294,5 +318,24 @@ public class RenderContext
 	public void SetVariable(string name, object value)
 	{
 		_variables[name] = value;
+	}
+
+	/// <summary>
+	/// Sets the parameter with the given name.
+	/// </summary>
+	/// <param name="name">The name of the variable.</param>
+	/// <param name="value">The variable value.</param>
+	public void SetParameter(string name, object value)
+	{
+		_parameters[name] = value;
+	}
+
+	/// <summary>
+	/// Sets all parameters for the current context.
+	/// </summary>
+	/// <param name="parameters">The parameter map.</param>
+	public void SetParameters(Map parameters)
+	{
+		_parameters = parameters ?? new();
 	}
 }

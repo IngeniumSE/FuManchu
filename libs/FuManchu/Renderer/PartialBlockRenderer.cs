@@ -70,19 +70,35 @@ public class PartialBlockRenderer : BlockRenderer
 		{
 			using (var scope = context.BeginScope(model))
 			{
+				if (maps is { Count: >0 })
+				{
+					scope.ScopeContext.SetParameters(maps);
+				}
+
 				context.Service.RunPartial(name, scope.ScopeContext, writer);
 			}
 		}
-		else if (maps is { Count: > 0 })
-		{
-			using (var scope = context.BeginScope(maps))
-			{
-				context.Service.RunPartial(name, scope.ScopeContext, writer);
-			}
-		}
+		//else if (maps is { Count: > 0 })
+		//{
+		//	using (var scope = context.BeginScope(maps))
+		//	{
+		//		context.Service.RunPartial(name, scope.ScopeContext, writer);
+		//	}
+		//}
 		else
 		{
-			context.Service.RunPartial(name, context, writer);
+			if (maps is { Count: > 0 })
+			{
+				using (var scope = context.BeginScope(context.TemplateData.Model))
+				{
+					scope.ScopeContext.SetParameters(maps);
+					context.Service.RunPartial(name, scope.ScopeContext, writer);
+				}
+			}
+			else
+			{
+				context.Service.RunPartial(name, context, writer);
+			}
 		}
 	}
 
