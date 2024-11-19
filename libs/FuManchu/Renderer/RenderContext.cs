@@ -18,7 +18,7 @@ using FuManchu.Tokenizer;
 public class RenderContext
 {
 	readonly Map _variables = new Map();
-	Map _parameters = new Map();
+	readonly Map _parameters = new Map();
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RenderContext"/> class.
@@ -121,6 +121,12 @@ public class RenderContext
 
 		return @default;
 	}
+
+	/// <summary>
+	/// Gets the parameters of the context.
+	/// </summary>
+	/// <returns>The parameters.</returns>
+	public Map GetParameters() => _parameters;
 
 	/// <summary>
 	/// Resolves the value represented by the given span.
@@ -325,7 +331,7 @@ public class RenderContext
 	/// </summary>
 	/// <param name="name">The name of the variable.</param>
 	/// <param name="value">The variable value.</param>
-	public void SetParameter(string name, object value)
+	public void SetParameter(string name, object? value)
 	{
 		_parameters[name] = value;
 	}
@@ -336,6 +342,12 @@ public class RenderContext
 	/// <param name="parameters">The parameter map.</param>
 	public void SetParameters(Map parameters)
 	{
-		_parameters = parameters ?? new();
+		if (parameters is { Count: > 0 })
+		{
+			foreach (var parameter in parameters)
+			{
+				SetParameter(parameter.Key, parameter.Value);
+			}
+		}
 	}
 }

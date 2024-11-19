@@ -71,6 +71,12 @@ public static class RenderContextFactory
 			UnknownValueResolver = parent.UnknownValueResolver
 		};
 
+		var parameters = parent.GetParameters();
+		if (parameters is { Count: >0 })
+		{
+			context.SetParameters(parameters);
+		}
+
 		// Set the root context 
 		context.RootRenderContext = parent.RootRenderContext ?? parent;
 
