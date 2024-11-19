@@ -269,6 +269,13 @@
   <strong>Billing Address</strong>
   <div>
     
+    Matthew Abbott,<br />
+    1 Somestreet Lane,<br />
+    
+    Somewhere,<br />
+    Co. Somewhere,<br />
+    AA11 1AA,<br />United Kingdom
+    
   </div>
 </div>
         
